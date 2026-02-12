@@ -1,2 +1,20 @@
+from django.test import TestCase
+from datetime import date
+from .models import MonthlyGenerationData
+from .country_codes import CountryCode
 
-# Create your tests here.
+class MonthlyGenerationDataTests(TestCase):
+    def test_create_monthly_generation_data(self):
+        data = MonthlyGenerationData.objects.create(
+            country="United States",
+            country_code=CountryCode.USA,
+            is_aggregate_entity=False,
+            date=date(2023, 1, 1),
+            fuel_type="Solar",
+            is_aggregate_series=False,
+            generation_twh=10.5,
+            share_of_generation_pct=5.2
+        )
+        self.assertEqual(data.country, "United States")
+        self.assertEqual(data.generation_twh, 10.5)
+        self.assertEqual(str(data), "United States - Solar (2023-01-01)")
