@@ -109,7 +109,6 @@
                 <tr>
                     <th>Rank</th>
                     <th>Country Name</th>
-                    <th>Code</th>
                     <th>Latest 12 Months (TWh)</th>
                     <th>Previous 12 Months (TWh)</th>
                     <th>YoY Growth</th>
@@ -120,7 +119,6 @@
                 <tr>
                     <td>{{ country.electricity_rank }}</td>
                     <td>{{ country.name }}</td>
-                    <td>{{ country.code }}</td>
                     <td>{{ country.generation_latest_12_months|floatformat:2 }}</td>
                     <td>{{ country.generation_previous_12_months|floatformat:2 }}</td>
                     <td>
