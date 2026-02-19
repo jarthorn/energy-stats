@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Stats - Countries</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #ecf0f1;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f9f9f9;
+            color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .growth-positive {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .growth-negative {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Countries Overview</h1>
+    </header>
+    <main>
+        <a href="{% url 'index' %}" class="btn-back">← Back to Home</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Country Name</th>
+                    <th>Code</th>
+                    <th>Latest 12 Months (TWh)</th>
+                    <th>Previous 12 Months (TWh)</th>
+                    <th>YoY Growth</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for country in countries %}
+                <tr>
+                    <td>{{ country.electricity_rank }}</td>
+                    <td>{{ country.name }}</td>
+                    <td>{{ country.code }}</td>
+                    <td>{{ country.generation_latest_12_months|floatformat:2 }}</td>
+                    <td>{{ country.generation_previous_12_months|floatformat:2 }}</td>
+                    <td>
+                        {% if country.yoy_growth_pct is not None %}
+                        <span
+                            class="{% if country.yoy_growth_pct > 0 %}growth-positive{% elif country.yoy_growth_pct < 0 %}growth-negative{% endif %}">
+                            {% if country.yoy_growth_pct > 0 %}+{% endif %}{{ country.yoy_growth_pct|floatformat:2 }}%
+                        </span>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+
+</html>
