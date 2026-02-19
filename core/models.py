@@ -21,9 +21,15 @@ class Country(models.Model):
     code = models.CharField(max_length=3, unique=True, help_text="3-letter ISO country code")
     summary = models.TextField(help_text="A short paragraph summarizing the electricity generation for this country")
     electricity_rank = models.IntegerField(help_text="The country's rank as an electricity producer")
-    generation_latest_12_months = models.FloatField(help_text="Sum of electricity generation in the most recent 12 months (TWh)")
-    generation_previous_12_months = models.FloatField(help_text="Sum of electricity generation from 24-13 months ago (TWh)")
-    latest_month = models.DateField(null=True, blank=True, help_text="The most recent month for which data is available")
+    generation_latest_12_months = models.FloatField(
+        help_text="Sum of electricity generation in the most recent 12 months (TWh)"
+    )
+    generation_previous_12_months = models.FloatField(
+        help_text="Sum of electricity generation from 24-13 months ago (TWh)"
+    )
+    latest_month = models.DateField(
+        null=True, blank=True, help_text="The most recent month for which data is available"
+    )
 
     class Meta:
         verbose_name_plural = "countries"
@@ -34,7 +40,9 @@ class Country(models.Model):
 
 
 class Fuel(models.Model):
-    type = models.CharField(max_length=100, unique=True, help_text="A unique string representing a particular type of fuel")
+    type = models.CharField(
+        max_length=100, unique=True, help_text="A unique string representing a particular type of fuel"
+    )
     rank = models.IntegerField(help_text="This fuel type's rank in total generation across all countries")
     summary = models.TextField(help_text="A paragraph describing this fuel type")
 
@@ -48,10 +56,18 @@ class Fuel(models.Model):
 class CountryFuel(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="country_fuels")
     fuel = models.ForeignKey(Fuel, on_delete=models.CASCADE, related_name="country_fuels")
-    share = models.FloatField(help_text="Percentage of this country's electricity supplied by this fuel over the most recent 12 months")
-    latest_month = models.DateField(help_text="The latest date for which generation data is available (always the first day of the month)")
-    generation_latest_12_months = models.FloatField(help_text="Sum of electricity generation in the most recent 12 months (TWh)")
-    generation_previous_12_months = models.FloatField(help_text="Sum of electricity generation from 24-13 months ago (TWh)")
+    share = models.FloatField(
+        help_text="Percentage of this country's electricity supplied by this fuel over the most recent 12 months"
+    )
+    latest_month = models.DateField(
+        help_text="The latest date for which generation data is available (always the first day of the month)"
+    )
+    generation_latest_12_months = models.FloatField(
+        help_text="Sum of electricity generation in the most recent 12 months (TWh)"
+    )
+    generation_previous_12_months = models.FloatField(
+        help_text="Sum of electricity generation from 24-13 months ago (TWh)"
+    )
 
     class Meta:
         unique_together = [("country", "fuel")]

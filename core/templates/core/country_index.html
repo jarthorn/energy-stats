@@ -117,7 +117,7 @@
             </thead>
             <tbody>
                 {% for country in countries %}
-                <tr>
+                <tr onclick="window.location.href='{% url 'country_detail' country.code %}';" style="cursor: pointer;">
                     <td>{{ country.electricity_rank }}</td>
                     <td>{{ country.name }}</td>
                     <td>{{ country.latest_month|date:"M Y" }}</td>
