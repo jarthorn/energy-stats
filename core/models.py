@@ -1,6 +1,7 @@
 from django.db import models
 from .country_codes import CountryCode
 
+
 class MonthlyGenerationData(models.Model):
     country = models.CharField(max_length=100)
     country_code = models.CharField(max_length=3, choices=[(tag.value, tag.value) for tag in CountryCode])
@@ -13,3 +14,31 @@ class MonthlyGenerationData(models.Model):
 
     def __str__(self):
         return f"{self.country} - {self.fuel_type} ({self.date})"
+
+
+class Country(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=3, unique=True, help_text="3-letter ISO country code")
+    summary = models.TextField(help_text="A short paragraph summarizing the electricity generation for this country")
+    electricity_rank = models.IntegerField(help_text="The country's rank as an electricity producer")
+    generation_latest_12_months = models.FloatField(help_text="Sum of electricity generation in the most recent 12 months (TWh)")
+    generation_previous_12_months = models.FloatField(help_text="Sum of electricity generation from 24-13 months ago (TWh)")
+
+    class Meta:
+        verbose_name_plural = "countries"
+        ordering = ["electricity_rank"]
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+
+class Fuel(models.Model):
+    type = models.CharField(max_length=100, unique=True, help_text="A unique string representing a particular type of fuel")
+    rank = models.IntegerField(help_text="This fuel type's rank in total generation across all countries")
+    summary = models.TextField(help_text="A paragraph describing this fuel type")
+
+    class Meta:
+        ordering = ["rank"]
+
+    def __str__(self):
+        return self.type
