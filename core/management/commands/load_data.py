@@ -89,8 +89,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--start-date",
-            default="2000-01",
-            help="Earliest month to fetch data for (YYYY-MM). Default: 2000-01",
+            default="2023-01",
+            help="Earliest month to fetch data for (YYYY-MM). Default: 2023-01",
         )
         parser.add_argument(
             "--country",
@@ -282,10 +282,6 @@ class Command(BaseCommand):
         # 6. Post-processing: assign rank to Fuel rows
         # ----------------------------------------------------------------------
         self.stdout.write("Ranking fuel types by total global generation...")
-        fuels_by_generation = Fuel.objects.order_by(
-            # We rank by the sum of latest-12-month generation across all countries
-            # stored on CountryFuel. This avoids keeping a separate in-memory dict.
-        )
         # Use DB aggregation for correctness
         from django.db.models import Sum
         fuel_totals = (
