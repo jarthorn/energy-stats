@@ -1,3 +1,4 @@
+from datetime import date
 from django.test import TestCase
 from core.models import Country
 
@@ -12,12 +13,14 @@ class CountryModelTests(TestCase):
             electricity_rank=5,
             generation_latest_12_months=542.3,
             generation_previous_12_months=558.1,
+            latest_month=date(2023, 12, 1),
         )
         self.assertEqual(country.name, "Germany")
         self.assertEqual(country.code, "DEU")
         self.assertEqual(country.electricity_rank, 5)
         self.assertEqual(country.generation_latest_12_months, 542.3)
         self.assertEqual(country.generation_previous_12_months, 558.1)
+        self.assertEqual(country.latest_month, date(2023, 12, 1))
         self.assertEqual(str(country), "Germany (DEU)")
 
     def test_country_code_is_unique(self):

@@ -211,6 +211,7 @@ class Command(BaseCommand):
                     "electricity_rank": 0,  # ranked in post-processing below
                     "generation_latest_12_months": country_latest,
                     "generation_previous_12_months": country_previous,
+                    "latest_month": latest_month,
                 },
             )
             action = "created" if created else "updated"

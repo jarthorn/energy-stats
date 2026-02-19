@@ -23,6 +23,7 @@ class Country(models.Model):
     electricity_rank = models.IntegerField(help_text="The country's rank as an electricity producer")
     generation_latest_12_months = models.FloatField(help_text="Sum of electricity generation in the most recent 12 months (TWh)")
     generation_previous_12_months = models.FloatField(help_text="Sum of electricity generation from 24-13 months ago (TWh)")
+    latest_month = models.DateField(null=True, blank=True, help_text="The most recent month for which data is available")
 
     class Meta:
         verbose_name_plural = "countries"
