@@ -42,3 +42,18 @@ class Fuel(models.Model):
 
     def __str__(self):
         return self.type
+
+
+class CountryFuel(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="country_fuels")
+    fuel = models.ForeignKey(Fuel, on_delete=models.CASCADE, related_name="country_fuels")
+    share = models.FloatField(help_text="Percentage of this country's electricity supplied by this fuel over the most recent 12 months")
+    latest_month = models.DateField(help_text="The latest date for which generation data is available (always the first day of the month)")
+    generation_latest_12_months = models.FloatField(help_text="Sum of electricity generation in the most recent 12 months (TWh)")
+    generation_previous_12_months = models.FloatField(help_text="Sum of electricity generation from 24-13 months ago (TWh)")
+
+    class Meta:
+        unique_together = [("country", "fuel")]
+
+    def __str__(self):
+        return f"{self.country} - {self.fuel}"
