@@ -26,6 +26,9 @@ select = [
 # Don't ignore trailing whitespace - we want to catch these!
 ignore = []
 
+[tool.ruff.lint.per-file-ignores]
+"core/migrations/*" = ["E501"]
+
 [dependency-groups]
 dev = [
     "ruff>=0.14.11",

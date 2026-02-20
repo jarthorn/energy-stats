@@ -21,7 +21,7 @@ def country_detail(request, code):
 
     yoy_growth_pct = _growth_rate(
         country.generation_latest_12_months,
-        country.generation_previous_12_month
+        country.generation_previous_12_months
     )
 
     start_date = None
@@ -68,4 +68,4 @@ def _growth_rate(latest, previous):
         increase = latest - previous
         growth = increase / previous
         return growth * 100
-    return None
+    return 0

@@ -113,6 +113,7 @@
                     <th>Latest 12 Months (TWh)</th>
                     <th>Previous 12 Months (TWh)</th>
                     <th>YoY Growth</th>
+                    <th>Low Carbon</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,6 +130,13 @@
                             class="{% if country.yoy_growth_pct > 0 %}growth-positive{% elif country.yoy_growth_pct < 0 %}growth-negative{% endif %}">
                             {% if country.yoy_growth_pct > 0 %}+{% endif %}{{ country.yoy_growth_pct|floatformat:2 }}%
                         </span>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if country.low_carbon_pct is not None %}
+                        {{ country.low_carbon_pct|floatformat:1 }}%
                         {% else %}
                         N/A
                         {% endif %}

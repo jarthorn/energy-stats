@@ -30,6 +30,9 @@ class Country(models.Model):
     latest_month = models.DateField(
         null=True, blank=True, help_text="The most recent month for which data is available"
     )
+    low_carbon_pct = models.FloatField(
+        null=True, blank=True, help_text="Percentage share of this country's fuels that come from low carbon sources"
+    )
 
     class Meta:
         verbose_name_plural = "countries"

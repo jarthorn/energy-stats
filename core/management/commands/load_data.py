@@ -200,6 +200,28 @@ class Command(BaseCommand):
             country_latest = sum(total_by_date.get(d, 0.0) for d in latest_12_dates)
             country_previous = sum(total_by_date.get(d, 0.0) for d in previous_12_dates)
 
+            # Calculate low carbon percentage
+            low_carbon_generation = 0.0
+            total_generation_except_imports = 0.0
+
+            LOW_CARBON_FUELS = {"Hydro", "Nuclear", "Wind", "Solar", "Bioenergy", "Other renewables"}
+
+            for r in raw_records:
+                fuel_type = r.get("series", "")
+                if fuel_type == "Net imports":
+                    continue
+
+                row_date = _parse_date(r["date"])
+                if row_date in latest_12_dates:
+                    gen = r.get("generation_twh") or 0.0
+                    total_generation_except_imports += gen
+                    if fuel_type in LOW_CARBON_FUELS:
+                        low_carbon_generation += gen
+
+            low_carbon_pct = None
+            if total_generation_except_imports > 0:
+                low_carbon_pct = (low_carbon_generation / total_generation_except_imports) * 100
+
             # ------------------------------------------------------------------
             # 3. Upsert Country (rank is set in a second pass below)
             # ------------------------------------------------------------------
@@ -212,6 +234,7 @@ class Command(BaseCommand):
                     "generation_latest_12_months": country_latest,
                     "generation_previous_12_months": country_previous,
                     "latest_month": latest_month,
+                    "low_carbon_pct": low_carbon_pct,
                 },
             )
             action = "created" if created else "updated"
