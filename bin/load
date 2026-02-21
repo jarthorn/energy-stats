@@ -1,3 +1,4 @@
 #!/bin/bash
 
-uv run manage.py load_data --country CAN --start-date 2022-01
+uv run manage.py extract_ember --country CAN --start-date 2022-01
+uv run manage.py transform_and_load --country CAN

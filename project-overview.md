@@ -9,3 +9,4 @@ A secondary objective is enabling the author to learn more about Python and Djan
 - Python 3.14
 - Django 6.0.2.
 - SQLite
+- Ruff for python formatting. Please run ruff check and ruff format before committing.
