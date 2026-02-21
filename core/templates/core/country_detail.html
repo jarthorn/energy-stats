@@ -177,6 +177,14 @@
                 <span class="tooltiptext">Sum of electricity generation in the most recent 12 months.</span>
             </div>
 
+            <!-- Low Carbon Share -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Low Carbon Share</div>
+                <div class="gauge-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+                <span class="tooltiptext">Percentage of this country's electricity supplied by low carbon
+                    sources.</span>
+            </div>
+
             <!-- YoY Growth -->
             <div class="gauge-card tooltip">
                 <div class="gauge-label">YoY Growth</div>
@@ -189,8 +197,12 @@
 
             <!-- Largest Source -->
             <div class="gauge-card tooltip">
-                <div class="gauge-label">Largest Source</div>
-                <div class="gauge-value">{{ largest_source.fuel.type|default:"N/A" }}</div>
+                <div class="gauge-label">Main Electricity Source</div>
+                <div class="gauge-value">
+                    {{ largest_source.fuel.type|default:"N/A" }}
+                </div>
+                <div class="gauge-subtext">{{ largest_source.share|floatformat:"1g" }}% of total generation</div>
+
                 {% if largest_source %}
                 <div class="gauge-subtext">{{ largest_source.generation_latest_12_months|floatformat:"1g" }} TWh</div>
                 {% endif %}
@@ -200,12 +212,12 @@
 
             <!-- Fastest Growing Source -->
             <div class="gauge-card tooltip">
-                <div class="gauge-label">Fastest Growing Power</div>
+                <div class="gauge-label">Fastest Growing Source</div>
                 <div class="gauge-value">{{ fastest_growing_source.fuel.type|default:"N/A" }}</div>
                 {% if fastest_growing_pct is not None %}
                 <div
                     class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
-                    {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}%
+                    {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}% YoY
                 </div>
                 {% endif %}
                 <span class="tooltiptext">The power source with the highest year-over-year growth rate over the past 12
