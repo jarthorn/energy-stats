@@ -204,6 +204,8 @@ def _transform_fuel_metrics(
         "avg_share": avg_share,
         "annual_yoy_growth": annual_growth,
         "month_yoy_growth": month_growth,
+        "latest_month_gen": fuel_by_date.get(latest_12_dates[-1], 0.0) if latest_12_dates else 0.0,
+        "latest_month_share": share_by_date.get(latest_12_dates[-1], 0.0) if latest_12_dates else 0.0,
     }
 
 def _load_country(code: str, country_name: str, metrics: dict, latest_month: date) -> Country:
@@ -243,6 +245,8 @@ def _load_fuel_data(
             "generation_previous_12_months": metrics["previous_total"],
             "month_yoy_growth": metrics["month_yoy_growth"],
             "annual_yoy_growth": metrics["annual_yoy_growth"],
+            "generation_latest_month": metrics["latest_month_gen"],
+            "share_latest_month": metrics["latest_month_share"],
         },
     )
 

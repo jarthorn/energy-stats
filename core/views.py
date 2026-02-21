@@ -55,6 +55,7 @@ def country_detail(request, code):
 
     context = {
         'country': country,
+        'country_fuels': country_fuels.order_by('-generation_latest_12_months'),
         'yoy_growth_pct': yoy_growth_pct,
         'start_date': start_date,
         'largest_source': largest_source,

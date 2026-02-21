@@ -64,6 +64,8 @@ class CountryFuelTransformTests(TestCase):
         # Month YoY Growth: ((10.0 / 12) - 1) * 100 = -16.67%
         self.assertEqual(cf.latest_month, date(2024, 12, 1))
         self.assertAlmostEqual(cf.month_yoy_growth, -16.66666667)
+        self.assertEqual(cf.generation_latest_month, 10.0)
+        self.assertEqual(cf.share_latest_month, 70.0)
 
     def test_country_fuel_pair_is_unique(self):
         """The transform_and_load command stays idempotent and unique constraints hold."""

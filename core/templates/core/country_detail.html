@@ -149,6 +149,57 @@
         .negative {
             color: #c0392b;
         }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            font-size: 0.95rem;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background-color: #fdfdfd;
+        }
+
+        .sub-heading {
+            text-align: center !important;
+            background-color: #f1f3f5 !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .fuel-col {
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .num-col {
+            text-align: right;
+        }
+
+        h2.section-title {
+            margin-top: 40px;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 15px;
+        }
     </style>
 </head>
 
@@ -224,6 +275,59 @@
                     months.</span>
             </div>
         </div>
+
+        {% if country.latest_month %}
+        <h2 class="section-title">Electricity Mix for {{ country.latest_month|date:"F Y" }}</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" class="fuel-col">Fuel Type</th>
+                    <th colspan="3" class="sub-heading">Monthly Snapshot</th>
+                    <th colspan="3" class="sub-heading">Yearly Snapshot (Last 12m)</th>
+                </tr>
+                <tr>
+                    <th class="num-col">Generation</th>
+                    <th class="num-col">Share</th>
+                    <th class="num-col">YoY Growth</th>
+                    <th class="num-col">Total Generation</th>
+                    <th class="num-col">Share</th>
+                    <th class="num-col">Annual Growth</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cf in country_fuels %}
+                <tr>
+                    <td class="fuel-col">{{ cf.fuel.type }}</td>
+                    <td class="num-col">{{ cf.generation_latest_month|floatformat:2 }} TWh</td>
+                    <td class="num-col">{{ cf.share_latest_month|floatformat:1 }}%</td>
+                    <td
+                        class="num-col {% if cf.month_yoy_growth > 0 %}positive{% elif cf.month_yoy_growth < 0 %}negative{% endif %}">
+                        {% if cf.month_yoy_growth is not None %}
+                        {% if cf.month_yoy_growth > 0 %}+{% endif %}{{ cf.month_yoy_growth|floatformat:1 }}%
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="num-col">{{ cf.generation_latest_12_months|floatformat:2 }} TWh</td>
+                    <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
+                    <td
+                        class="num-col {% if cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth < 0 %}negative{% endif %}">
+                        {% if cf.annual_yoy_growth is not None %}
+                        {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #95a5a6; padding: 40px;">No detailed fuel mix data
+                        available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
 
     </main>
 </body>

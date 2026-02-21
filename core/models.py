@@ -68,6 +68,14 @@ class CountryFuel(models.Model):
     generation_latest_12_months = models.FloatField(
         help_text="Sum of electricity generation in the most recent 12 months (TWh)"
     )
+    generation_latest_month = models.FloatField(
+        null=True, blank=True,
+        help_text="Electricity generation in the most recent month (TWh)"
+    )
+    share_latest_month = models.FloatField(
+        null=True, blank=True,
+        help_text="Percentage of this country's electricity supplied by this fuel in the most recent month (%)"
+    )
     generation_previous_12_months = models.FloatField(
         help_text="Sum of electricity generation from 24-13 months ago (TWh)"
     )
