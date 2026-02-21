@@ -71,6 +71,14 @@ class CountryFuel(models.Model):
     generation_previous_12_months = models.FloatField(
         help_text="Sum of electricity generation from 24-13 months ago (TWh)"
     )
+    month_yoy_growth = models.FloatField(
+        null=True, blank=True,
+        help_text="Growth rate between the latest month, and the same month in the previous year (%)"
+    )
+    annual_yoy_growth = models.FloatField(
+        null=True, blank=True,
+        help_text="Growth rate between the latest 12 months and the previous 12 months (%)"
+    )
 
     class Meta:
         unique_together = [("country", "fuel")]

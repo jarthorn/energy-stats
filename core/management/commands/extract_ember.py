@@ -1,8 +1,8 @@
 """
 Management command: extract_ember
 
-Extracts monthly electricity generation data from the Ember API and loads it 
-into the MonthlyGenerationData model. This is the 'Extract' phase of our ETL 
+Extracts monthly electricity generation data from the Ember API and loads it
+into the MonthlyGenerationData model. This is the 'Extract' phase of our ETL
 pipeline.
 
 Usage:
@@ -103,7 +103,7 @@ class Command(BaseCommand):
             for r in raw_records:
                 row_date = _parse_date(r["date"])
                 fuel_type = r.get("series", "")
-                
+
                 # Load into MonthlyGenerationData
                 obj, created = MonthlyGenerationData.objects.update_or_create(
                     country_code=str(country_code),
