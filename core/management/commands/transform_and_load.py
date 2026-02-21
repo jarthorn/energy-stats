@@ -216,6 +216,7 @@ def _load_country(code: str, country_name: str, metrics: dict, latest_month: dat
             "generation_previous_12_months": metrics["previous_total"],
             "latest_month": latest_month,
             "low_carbon_pct": metrics["low_carbon_pct"],
+            "electricity_rank": 0,  # Ranked in post-processing
         },
     )
     return country_obj
@@ -229,7 +230,7 @@ def _load_fuel_data(
     """Persist transformed fuel metrics and associations to the database (Load)."""
     fuel_obj, _ = Fuel.objects.update_or_create(
         type=fuel_type,
-        defaults={},  # rank is updated in a separate post-processing step
+        defaults={"rank": 0},  # Rank is updated in a separate post-processing step
     )
 
     CountryFuel.objects.update_or_create(
