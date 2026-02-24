@@ -273,9 +273,28 @@ def _apply_rankings(stdout) -> None:
         .order_by("-total")
     )
     for rank, row in enumerate(fuel_totals, start=1):
-        Fuel.objects.filter(type=row["fuel__type"]).update(
+        fuel_type = row["fuel__type"]
+        total_gen = row["total"] or 0.0
+
+        # Find country with most generation for this fuel
+        top_gen_cf = (
+            CountryFuel.objects.filter(fuel__type=fuel_type)
+            .order_by("-generation_latest_12_months")
+            .first()
+        )
+
+        # Find country with largest share for this fuel
+        top_share_cf = (
+            CountryFuel.objects.filter(fuel__type=fuel_type)
+            .order_by("-share")
+            .first()
+        )
+
+        Fuel.objects.filter(type=fuel_type).update(
             rank=rank,
-            generation_latest_12_months=row["total"] or 0.0
+            generation_latest_12_months=total_gen,
+            top_country_generation=top_gen_cf.country if top_gen_cf else None,
+            top_country_share=top_share_cf.country if top_share_cf else None
         )
 
     stdout.write("Calculating all-time generation for fuel types...")

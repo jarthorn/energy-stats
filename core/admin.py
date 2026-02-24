@@ -15,7 +15,7 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(Fuel)
 class FuelAdmin(admin.ModelAdmin):
-    list_display = ('type', 'rank', 'generation_latest_12_months', 'generation_all_time')
+    list_display = ('type', 'rank', 'generation_latest_12_months', 'top_country_generation', 'top_country_share')
     search_fields = ('type',)
     ordering = ('rank',)
 

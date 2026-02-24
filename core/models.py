@@ -56,6 +56,22 @@ class Fuel(models.Model):
         default=0.0,
         help_text="Total global electricity generation from this fuel source in the most recent 12 months (TWh)"
     )
+    top_country_generation = models.ForeignKey(
+        Country,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="top_generation_fuels",
+        help_text="The country with the most generation from this fuel over the latest 12 months"
+    )
+    top_country_share = models.ForeignKey(
+        Country,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="top_share_fuels",
+        help_text="The country with the largest generation share from this fuel over 12 months"
+    )
 
     class Meta:
         ordering = ["rank"]
