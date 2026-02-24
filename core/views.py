@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Country, CountryFuel, CountryFuelYear
+from .models import Country, CountryFuel, CountryFuelYear, Fuel
 import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -17,6 +17,10 @@ def country_index(request):
         )
 
     return render(request, 'core/country_index.html', {'countries': countries})
+
+def fuel_index(request):
+    fuels = Fuel.objects.all().order_by('rank')
+    return render(request, 'core/fuel_index.html', {'fuels': fuels})
 
 def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
