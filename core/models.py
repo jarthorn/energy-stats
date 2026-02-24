@@ -93,3 +93,21 @@ class CountryFuel(models.Model):
 
     def __str__(self):
         return f"{self.country} - {self.fuel}"
+
+
+class CountryFuelYear(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="annual_data")
+    fuel = models.ForeignKey(Fuel, on_delete=models.CASCADE, related_name="annual_data")
+    year = models.IntegerField()
+    is_complete = models.BooleanField(help_text="Indicates if we have data for the entire year.")
+    share = models.FloatField(help_text="Share of this country's total fuel generation that came from this fuel")
+    generation = models.FloatField(help_text="Total electricity generation from this fuel for this year and country")
+    yoy_growth = models.FloatField(
+        help_text="Percent growth since the previous year. A value of zero is used if no data are available for the previous year."
+    )
+
+    class Meta:
+        unique_together = [("country", "fuel", "year")]
+
+    def __str__(self):
+        return f"{self.country} - {self.fuel} ({self.year})"
