@@ -48,6 +48,14 @@ class Fuel(models.Model):
     )
     rank = models.IntegerField(help_text="This fuel type's rank in total generation across all countries")
     summary = models.TextField(help_text="A paragraph describing this fuel type")
+    generation_all_time = models.FloatField(
+        default=0.0,
+        help_text="Total electricity generation from this fuel source across all recorded data (TWh)"
+    )
+    generation_latest_12_months = models.FloatField(
+        default=0.0,
+        help_text="Total global electricity generation from this fuel source in the most recent 12 months (TWh)"
+    )
 
     class Meta:
         ordering = ["rank"]

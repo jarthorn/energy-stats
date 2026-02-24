@@ -273,7 +273,19 @@ def _apply_rankings(stdout) -> None:
         .order_by("-total")
     )
     for rank, row in enumerate(fuel_totals, start=1):
-        Fuel.objects.filter(type=row["fuel__type"]).update(rank=rank)
+        Fuel.objects.filter(type=row["fuel__type"]).update(
+            rank=rank,
+            generation_latest_12_months=row["total"] or 0.0
+        )
+
+    stdout.write("Calculating all-time generation for fuel types...")
+    all_time_totals = (
+        MonthlyGenerationData.objects
+        .values("fuel_type")
+        .annotate(total=Sum("generation_twh"))
+    )
+    for row in all_time_totals:
+        Fuel.objects.filter(type=row["fuel_type"]).update(generation_all_time=row["total"] or 0.0)
 
 
 def _load_annual_data(country_obj: Country, records) -> None:
