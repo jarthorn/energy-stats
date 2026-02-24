@@ -7,4 +7,5 @@ urlpatterns = [
     path('countries/<str:code>/', views.country_detail, name='country_detail'),
     path('countries/<str:code>/fuels/<str:fuel_type>/', views.country_fuel_detail, name='country_fuel_detail'),
     path('fuels/', views.fuel_index, name='fuel_index'),
+    path('fuels/<str:fuel_type>/', views.fuel_detail, name='fuel_detail'),
 ]

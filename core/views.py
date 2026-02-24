@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Country, CountryFuel, CountryFuelYear, Fuel
+from .models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear
 import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -120,6 +120,54 @@ def country_fuel_detail(request, code, fuel_type):
         'graph_html': graph_html,
     }
     return render(request, 'core/country_fuel_detail.html', context)
+
+def fuel_detail(request, fuel_type):
+    fuel = get_object_or_404(Fuel, type=fuel_type)
+
+    # Fetch annual global data for the graph
+    annual_data = FuelYear.objects.filter(fuel=fuel).order_by('year')
+
+    years = [d.year for d in annual_data]
+    generations = [d.generation for d in annual_data]
+    shares = [d.share for d in annual_data]
+
+    graph_html = None
+    if years:
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        # Add traces
+        fig.add_trace(
+            go.Bar(x=years, y=generations, name="Global Gen (TWh)", marker_color='#3498db'),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(x=years, y=shares, name="Global Share (%)", line=dict(color='#e74c3c', width=3)),
+            secondary_y=True,
+        )
+
+        fig.update_layout(
+            title_text=f"Global {fuel.type} Generation and Share over Time",
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+
+        fig.update_yaxes(title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(title_text="<b>Share</b> (%)", secondary_y=True, showgrid=False)
+        fig.update_xaxes(type='category', showgrid=False)
+
+        graph_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+
+    # Fetch country distribution
+    country_fuels = CountryFuel.objects.filter(fuel=fuel).order_by('-generation_latest_12_months')
+
+    context = {
+        'fuel': fuel,
+        'graph_html': graph_html,
+        'country_fuels': country_fuels,
+    }
+    return render(request, 'core/fuel_detail.html', context)
 
 def _growth_rate(latest, previous):
     if previous > 0:
