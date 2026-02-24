@@ -19,7 +19,7 @@ from datetime import date
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Sum
 
-from core.models import Country, CountryFuel, CountryFuelYear, Fuel, MonthlyGenerationData
+from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear, MonthlyGenerationData
 
 logger = logging.getLogger(__name__)
 
@@ -305,6 +305,42 @@ def _apply_rankings(stdout) -> None:
     )
     for row in all_time_totals:
         Fuel.objects.filter(type=row["fuel_type"]).update(generation_all_time=row["total"] or 0.0)
+
+    stdout.write("Populating annual global fuel data (FuelYear)...")
+    # 1. Calculate global total generation per year (excluding aggregates to avoid double counting)
+    global_annual_totals = (
+        MonthlyGenerationData.objects.filter(is_aggregate_series=False)
+        .values("date__year")
+        .annotate(total=Sum("generation_twh"))
+    )
+    year_totals = {row["date__year"]: row["total"] for row in global_annual_totals}
+
+    # 2. Calculate global fuel generation per year
+    fuel_annual_totals = (
+        MonthlyGenerationData.objects.values("fuel_type", "date__year")
+        .annotate(total=Sum("generation_twh"))
+    )
+
+    for row in fuel_annual_totals:
+        fuel_type = row["fuel_type"]
+        year = row["date__year"]
+        gen = row["total"] or 0.0
+
+        if not fuel_type:
+            continue
+
+        fuel_obj = Fuel.objects.get(type=fuel_type)
+        total_gen_for_year = year_totals.get(year, 0.0)
+        share = (gen / total_gen_for_year * 100) if total_gen_for_year > 0 else 0.0
+
+        FuelYear.objects.update_or_create(
+            fuel=fuel_obj,
+            year=year,
+            defaults={
+                "generation": gen,
+                "share": share,
+            }
+        )
 
 
 def _load_annual_data(country_obj: Country, records) -> None:

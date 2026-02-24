@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MonthlyGenerationData, Country, Fuel, CountryFuel, CountryFuelYear
+from .models import MonthlyGenerationData, Country, Fuel, CountryFuel, CountryFuelYear, FuelYear
 
 @admin.register(MonthlyGenerationData)
 class MonthlyGenerationDataAdmin(admin.ModelAdmin):
@@ -30,3 +30,10 @@ class CountryFuelYearAdmin(admin.ModelAdmin):
     list_display = ('country', 'fuel', 'year', 'generation', 'share', 'is_complete')
     list_filter = ('fuel', 'year', 'is_complete')
     search_fields = ('country__name', 'country__code', 'fuel__type')
+
+
+@admin.register(FuelYear)
+class FuelYearAdmin(admin.ModelAdmin):
+    list_display = ('fuel', 'year', 'generation', 'share')
+    list_filter = ('fuel', 'year')
+    search_fields = ('fuel__type',)
