@@ -155,6 +155,15 @@
         .negative {
             color: #c0392b;
         }
+
+        .graph-container {
+            margin-top: 40px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 
@@ -218,6 +227,13 @@
                     period.</span>
             </div>
         </div>
+
+        <!-- Graph Section -->
+        {% if graph_html %}
+        <div class="graph-container">
+            {{ graph_html|safe }}
+        </div>
+        {% endif %}
 
         <!-- Future sections will go here -->
     </main>

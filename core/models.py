@@ -103,7 +103,8 @@ class CountryFuelYear(models.Model):
     share = models.FloatField(help_text="Share of this country's total fuel generation that came from this fuel")
     generation = models.FloatField(help_text="Total electricity generation from this fuel for this year and country")
     yoy_growth = models.FloatField(
-        help_text="Percent growth since the previous year. A value of zero is used if no data are available for the previous year."
+        help_text="Percent growth since the previous year. "
+        "A value of zero is used if no data are available for the previous year."
     )
 
     class Meta:
