@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Stats - {{ country.name }} - {{ fuel.type }}</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #ecf0f1;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
+        .summary-line {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .gauge-card {
+            flex: 1 1 200px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+            cursor: help;
+        }
+
+        .gauge-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .gauge-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gauge-subtext {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        /* Tooltip container */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 110%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            font-weight: normal;
+            line-height: 1.4;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .gauge-card:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .positive {
+            color: #27ae60;
+        }
+
+        .negative {
+            color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>{{ country.name }} - {{ fuel.type }}</h1>
+    </header>
+    <main>
+        <a href="{% url 'country_detail' country.code %}" class="btn-back">← Back to {{ country.name }}</a>
+
+        <div class="summary-line">
+            {{ country.name }} • {{ fuel.type }} • Latest Month: {{ country_fuel.latest_month|date:"F Y" }}
+        </div>
+
+        <div class="dashboard">
+            <!-- Share -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Generation Share</div>
+                <div class="gauge-value">{{ country_fuel.share|floatformat:1 }}%</div>
+                <span class="tooltiptext">The average share of total generation from this fuel over the most recent 12
+                    months.</span>
+            </div>
+
+            <!-- Generation Latest Month -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Generation (Month)</div>
+                <div class="gauge-value">{{ country_fuel.generation_latest_month|floatformat:"2g" }} TWh</div>
+                <div class="gauge-subtext">{{ country_fuel.latest_month|date:"M Y" }}</div>
+                <span class="tooltiptext">Electricity generation from this fuel in the most recent month.</span>
+            </div>
+
+            <!-- Month YoY Growth -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Month YoY Growth</div>
+                <div
+                    class="gauge-value {% if country_fuel.month_yoy_growth > 0 %}positive{% elif country_fuel.month_yoy_growth < 0 %}negative{% endif %}">
+                    {% if country_fuel.month_yoy_growth > 0 %}+{% endif %}
+                    {{country_fuel.month_yoy_growth|floatformat:1}}%
+                </div>
+                <span class="tooltiptext">Growth rate between the latest month and the same month in the previous
+                    year.</span>
+            </div>
+
+            <!-- Generation Latest 12 Months -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Generation (Year)</div>
+                <div class="gauge-value">{{ country_fuel.generation_latest_12_months|floatformat:"2g" }} TWh</div>
+                <span class="tooltiptext">Total electricity generation from this fuel over the most recent 12-month
+                    period.</span>
+            </div>
+
+            <!-- Annual YoY Growth -->
+            <div class="gauge-card tooltip">
+                <div class="gauge-label">Annual YoY Growth</div>
+                <div
+                    class="gauge-value {% if country_fuel.annual_yoy_growth > 0 %}positive{% elif country_fuel.annual_yoy_growth < 0 %}negative{% endif %}">
+                    {% if country_fuel.annual_yoy_growth > 0 %}+{% endif %}
+                    {{country_fuel.annual_yoy_growth|floatformat:1 }}%
+                </div>
+                <span class="tooltiptext">Growth rate between the latest 12 months and the previous 12-month
+                    period.</span>
+            </div>
+        </div>
+
+        <!-- Future sections will go here -->
+    </main>
+</body>
+
+</html>

@@ -250,7 +250,14 @@
             <div class="gauge-card tooltip">
                 <div class="gauge-label">Main Electricity Source</div>
                 <div class="gauge-value">
-                    {{ largest_source.fuel.type|default:"N/A" }}
+                    {% if largest_source %}
+                    <a href="{% url 'country_fuel_detail' country.code largest_source.fuel.type %}"
+                        style="text-decoration: none; color: inherit; border-bottom: 2px solid var(--accent-color);">
+                        {{ largest_source.fuel.type }}
+                    </a>
+                    {% else %}
+                    N/A
+                    {% endif %}
                 </div>
                 <div class="gauge-subtext">{{ largest_source.share|floatformat:"1g" }}% of total generation</div>
 
@@ -264,7 +271,16 @@
             <!-- Fastest Growing Source -->
             <div class="gauge-card tooltip">
                 <div class="gauge-label">Fastest Growing Source</div>
-                <div class="gauge-value">{{ fastest_growing_source.fuel.type|default:"N/A" }}</div>
+                <div class="gauge-value">
+                    {% if fastest_growing_source %}
+                    <a href="{% url 'country_fuel_detail' country.code fastest_growing_source.fuel.type %}"
+                        style="text-decoration: none; color: inherit; border-bottom: 2px solid var(--accent-color);">
+                        {{ fastest_growing_source.fuel.type }}
+                    </a>
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </div>
                 {% if fastest_growing_pct is not None %}
                 <div
                     class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
@@ -297,7 +313,12 @@
             <tbody>
                 {% for cf in country_fuels %}
                 <tr>
-                    <td class="fuel-col">{{ cf.fuel.type }}</td>
+                    <td class="fuel-col">
+                        <a href="{% url 'country_fuel_detail' country.code cf.fuel.type %}"
+                            style="text-decoration: none; color: inherit; border-bottom: 1px dashed var(--accent-color);">
+                            {{ cf.fuel.type }}
+                        </a>
+                    </td>
                     <td class="num-col">{{ cf.generation_latest_month|floatformat:2 }} TWh</td>
                     <td class="num-col">{{ cf.share_latest_month|floatformat:1 }}%</td>
                     <td

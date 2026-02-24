@@ -64,6 +64,17 @@ def country_detail(request, code):
     }
     return render(request, 'core/country_detail.html', context)
 
+def country_fuel_detail(request, code, fuel_type):
+    country = get_object_or_404(Country, code=code)
+    country_fuel = get_object_or_404(CountryFuel, country=country, fuel__type=fuel_type)
+
+    context = {
+        'country': country,
+        'country_fuel': country_fuel,
+        'fuel': country_fuel.fuel,
+    }
+    return render(request, 'core/country_fuel_detail.html', context)
+
 def _growth_rate(latest, previous):
     if previous > 0:
         increase = latest - previous
