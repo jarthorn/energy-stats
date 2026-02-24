@@ -19,7 +19,7 @@ from datetime import date
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Sum
 
-from core.models import Country, CountryFuel, Fuel, MonthlyGenerationData
+from core.models import Country, CountryFuel, CountryFuelYear, Fuel, MonthlyGenerationData
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,10 @@ class Command(BaseCommand):
                 # Load fuel data and associations
                 _load_fuel_data(country_obj, fuel_type, fuel_metrics, latest_month)
 
-        # 4. Post-processing: Final Load phase (Rankings)
+            # 4. Transform & Load: Annual Aggregations
+            _load_annual_data(country_obj, records)
+
+        # 5. Post-processing: Final Load phase (Rankings)
         _apply_rankings(self.stdout)
 
         self.stdout.write(self.style.SUCCESS("\nTransformation and Loading complete."))
@@ -271,3 +274,61 @@ def _apply_rankings(stdout) -> None:
     )
     for rank, row in enumerate(fuel_totals, start=1):
         Fuel.objects.filter(type=row["fuel__type"]).update(rank=rank)
+
+
+def _load_annual_data(country_obj: Country, records) -> None:
+    """
+    Calculate and persist annual aggregation for each fuel type.
+    """
+    annual_country_totals = defaultdict(float)
+    annual_fuel_totals = defaultdict(float)
+    year_months = defaultdict(set)
+    fuel_types = set()
+
+    for r in records:
+        year = r.date.year
+        # Use only non-aggregate series for the country total to avoid double counting
+        if not r.is_aggregate_series:
+            annual_country_totals[year] += r.generation_twh
+
+        # Track generation for all fuel types (including aggregates like "Renewables")
+        annual_fuel_totals[(year, r.fuel_type)] += r.generation_twh
+        year_months[year].add(r.date.month)
+        if r.fuel_type:
+            fuel_types.add(r.fuel_type)
+
+    years = sorted(annual_country_totals.keys())
+
+    for year in years:
+        is_complete = len(year_months[year]) == 12
+        total_gen = annual_country_totals[year]
+
+        for fuel_type in fuel_types:
+            # Check if we have data for this fuel/year
+            if (year, fuel_type) not in annual_fuel_totals:
+                continue
+
+            gen = annual_fuel_totals[(year, fuel_type)]
+            share = (gen / total_gen * 100) if total_gen > 0 else 0.0
+
+            # Growth calculation
+            # "A value of zero is used if no data are available for the previous year."
+            yoy_growth = 0.0
+            if (year - 1, fuel_type) in annual_fuel_totals:
+                prev_year_gen = annual_fuel_totals[(year - 1, fuel_type)]
+                if prev_year_gen > 0:
+                    yoy_growth = ((gen / prev_year_gen) - 1) * 100
+
+            fuel_obj = Fuel.objects.get(type=fuel_type)
+
+            CountryFuelYear.objects.update_or_create(
+                country=country_obj,
+                fuel=fuel_obj,
+                year=year,
+                defaults={
+                    "is_complete": is_complete,
+                    "share": share,
+                    "generation": gen,
+                    "yoy_growth": yoy_growth,
+                },
+            )
