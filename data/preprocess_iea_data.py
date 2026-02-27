@@ -1,6 +1,8 @@
 import csv
 import sys
 
+
+
 # Hard-coded lists for filtering. Feel free to modify these.
 ALLOWED_COUNTRIES = {
     "Australia", 
@@ -52,16 +54,25 @@ COUNTRY_MAPPING = {
     "Republic of Turkiye": "Türkiye"
 }
 
+PRIMARY_ENERGY_PRODUCTS = {
+    "Coal, peat and oil shale",
+    "Crude, NGL and feedstocks",
+    "Natural gas",
+    "Nuclear",
+    "Renewables and waste"
+}
+
 MIN_YEAR = 2000
 
 def process_csv(input_filepath, output_filepath):
     """
-    Reads a CSV from input_filepath, filters out rows and columns based on
-    hard-coded conditions, and writes the resulting CSV to output_filepath.
+    Processes a CSV representation of IEA World Energy Balances dataset.
+    https://www.iea.org/data-and-statistics/data-product/world-energy-balances
     
     Filtering Rules:
     - Omit rows where Country (Column A) is not in ALLOWED_COUNTRIES
-    - Omit rows where Flow (Column C) is not in ALLOWED_FLOWS
+    - Omit secondary energy products
+    - Omit flows other than total energy supply
     - Omit all year columns before MIN_YEAR
     """
     with open(input_filepath, 'r', newline='', encoding='utf-8') as infile, \
@@ -128,9 +139,15 @@ def process_csv(input_filepath, output_filepath):
 def _is_flow_allowed(product, flow):
     if product == "Electricity" and flow == "Electricity, CHP and heat plants (PJ)":
         return True
-    elif product != "Electricity" and flow == "Total energy supply (PJ)":
+    elif _is_primary_energy(product) and flow == "Total energy supply (PJ)":
+        return True
+    elif product == "Total" and flow == "Total energy supply (PJ)":
         return True
     return False
+
+def _is_primary_energy(product):
+    # Exclude secondary energy products such as refined oil and heat
+    return product in PRIMARY_ENERGY_PRODUCTS
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
