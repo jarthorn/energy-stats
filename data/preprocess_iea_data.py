@@ -8,6 +8,7 @@ ALLOWED_COUNTRIES = {
     "Belgium",
     "Canada",
     "Chile",
+    "China",
     "Colombia",
     "Costa Rica",
     "Czech Republic",
@@ -19,6 +20,7 @@ ALLOWED_COUNTRIES = {
     "Greece",
     "Hungary",
     "Iceland",
+    "India",
     "Ireland",
     "Israel",
     "Italy",
@@ -38,9 +40,16 @@ ALLOWED_COUNTRIES = {
     "Spain",
     "Sweden",
     "Switzerland",
-    "Republic of Türkiye",
+    "Türkiye",
     "United Kingdom",
     "United States"
+}
+
+# Mapping to rename countries to standard names.
+# Feel free to add more mappings.
+COUNTRY_MAPPING = {
+    "People's Republic of China": "China",
+    "Republic of Turkiye": "Türkiye"
 }
 
 MIN_YEAR = 2000
@@ -59,7 +68,7 @@ def process_csv(input_filepath, output_filepath):
          open(output_filepath, 'w', newline='', encoding='utf-8') as outfile:
         
         reader = csv.reader(infile)
-        writer = csv.writer(outfile)
+        writer = csv.writer(outfile, lineterminator='\n')
         
         # Read the first line (source info) and keep it as is
         source_line = next(reader, None)
@@ -101,8 +110,14 @@ def process_csv(input_filepath, output_filepath):
             product = row[1]
             flow = row[2]
             
+            # Map the country name if it exists in our mapping
+            if country in COUNTRY_MAPPING:
+                country = COUNTRY_MAPPING[country]
+            
             # Check filtering conditions
             if country in ALLOWED_COUNTRIES and _is_flow_allowed(product, flow):
+                # Update the country name in the row that will be written
+                row[0] = country
                 filtered_row = [row[i] for i in indices_to_keep if i < len(row)]
                 writer.writerow(filtered_row)
                 rows_kept += 1
