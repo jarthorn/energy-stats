@@ -1,3 +1,6 @@
+# Project specific files
+data/iea-world-energy-balances-2025.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
