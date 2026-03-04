@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear
+from .models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear, MonthlyGenerationData
 import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -90,34 +90,105 @@ def country_fuel_detail(request, code, fuel_type):
 
         # Add traces
         fig.add_trace(
-            go.Bar(x=years, y=generations, name="Generation (TWh)", marker_color='#3498db'),
+            go.Bar(x=years, y=generations, name="Generation (TWh)", marker_color="#3498db"),
             secondary_y=False,
         )
         fig.add_trace(
-            go.Scatter(x=years, y=shares, name="Share (%)", line=dict(color='#e74c3c', width=3)),
+            go.Scatter(x=years, y=shares, name="Share (%)", line=dict(color="#e74c3c", width=3)),
             secondary_y=True,
         )
 
         # Add figure title and layout properties
         fig.update_layout(
-            title_text="Generation and Share over Time",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
 
         # Set y-axes titles
-        fig.update_yaxes(title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(
+            title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor="lightgray"
+        )
         fig.update_yaxes(title_text="<b>Share</b> (%)", secondary_y=True, showgrid=False)
-        fig.update_xaxes(type='category', showgrid=False) # Ensure years aren't displayed as floats
+        fig.update_xaxes(type="category", showgrid=False)  # Ensure years aren't displayed as floats
 
-        graph_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+    # Monthly generation comparison graph (latest 12 months vs previous 12 months)
+    monthly_graph_html = None
+    if country_fuel.latest_month:
+        # Get up to 24 months of data ending at the latest month
+        latest_month = country_fuel.latest_month
+        # Compute the date 23 months before latest_month (start of 24-month window)
+        start_year = latest_month.year
+        start_month = latest_month.month - 23
+        while start_month <= 0:
+            start_month += 12
+            start_year -= 1
+        window_start = datetime.date(start_year, start_month, 1)
+
+        monthly_qs = MonthlyGenerationData.objects.filter(
+            country_code=country.code,
+            fuel_type=fuel_type,
+            is_aggregate_entity=False,
+            is_aggregate_series=False,
+            date__gte=window_start,
+            date__lte=latest_month,
+        ).order_by("date")
+
+        # We need at least 12 months to draw the latest-year line
+        if monthly_qs.count() >= 12:
+            data_points = list(monthly_qs)
+            # Latest 12 months
+            recent_data = data_points[-12:]
+            months_labels = [d.date.strftime("%b %Y") for d in recent_data]
+            recent_values = [d.generation_twh for d in recent_data]
+
+            # Previous 12 months (if available) for comparison
+            previous_values = None
+            if len(data_points) >= 24:
+                previous_data = data_points[-24:-12]
+                previous_values = [d.generation_twh for d in previous_data]
+
+            fig_monthly = go.Figure()
+            fig_monthly.add_trace(
+                go.Scatter(
+                    x=months_labels,
+                    y=recent_values,
+                    mode="lines+markers",
+                    name="Latest 12 months",
+                    line=dict(color="#3498db", width=3),
+                )
+            )
+
+            if previous_values:
+                fig_monthly.add_trace(
+                    go.Scatter(
+                        x=months_labels,
+                        y=previous_values,
+                        mode="lines+markers",
+                        name="Previous 12 months",
+                        line=dict(color="#95a5a6", width=2, dash="dash"),
+                    )
+                )
+
+            fig_monthly.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                margin=dict(l=40, r=20, t=60, b=40),
+            )
+            fig_monthly.update_yaxes(title_text="<b>Generation</b> (TWh)", showgrid=True, gridcolor="lightgray")
+            fig_monthly.update_xaxes(showgrid=False)
+
+            monthly_graph_html = fig_monthly.to_html(full_html=False, include_plotlyjs=False)
 
     context = {
         'country': country,
         'country_fuel': country_fuel,
         'fuel': country_fuel.fuel,
         'graph_html': graph_html,
+        'monthly_graph_html': monthly_graph_html,
     }
     return render(request, 'core/country_fuel_detail.html', context)
 

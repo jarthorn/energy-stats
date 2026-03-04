@@ -164,6 +164,13 @@
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+        .graph-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 12px;
+        }
     </style>
 </head>
 
@@ -228,10 +235,19 @@
             </div>
         </div>
 
-        <!-- Graph Section -->
+        <!-- Annual graph section -->
         {% if graph_html %}
         <div class="graph-container">
+            <div class="graph-title">Annual {{ fuel.type }} Generation and Share - {{ country.name }}</div>
             {{ graph_html|safe }}
+        </div>
+        {% endif %}
+
+        <!-- Monthly comparison graph section -->
+        {% if monthly_graph_html %}
+        <div class="graph-container">
+            <div class="graph-title">Monthly {{ fuel.type }} Generation – {{ country.name }}</div>
+            {{ monthly_graph_html|safe }}
         </div>
         {% endif %}
 
