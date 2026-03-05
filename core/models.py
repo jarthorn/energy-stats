@@ -149,3 +149,37 @@ class FuelYear(models.Model):
 
     def __str__(self):
         return f"{self.fuel} - {self.year}"
+
+
+class MonthlyGenerationRecord(models.Model):
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="monthly_generation_records",
+        help_text="Country for which this record was set",
+    )
+    fuel = models.ForeignKey(
+        Fuel,
+        on_delete=models.CASCADE,
+        related_name="monthly_generation_records",
+        help_text="Fuel type for which this record was set",
+    )
+    date = models.DateField(help_text="Month for which this record applies (first day of the month)")
+    record_type = models.CharField(
+        max_length=32,
+        help_text="Type of record, e.g. 'generation' or 'share'",
+    )
+    generation_twh = models.FloatField(
+        help_text="Electricity generation from this fuel in this month (TWh) at the time of the record"
+    )
+    share_of_generation_pct = models.FloatField(
+        help_text="Share of total generation from this fuel in this month (%) at the time of the record"
+    )
+
+    class Meta:
+        verbose_name = "monthly generation record"
+        verbose_name_plural = "monthly generation records"
+        ordering = ["country", "fuel", "date", "record_type"]
+
+    def __str__(self):
+        return f"{self.country} - {self.fuel} ({self.date}, {self.record_type})"
