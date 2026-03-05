@@ -200,6 +200,11 @@
             border-left: 4px solid var(--accent-color);
             padding-left: 15px;
         }
+        .section-description {
+            margin-top: 5px;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 
@@ -350,6 +355,55 @@
         </table>
         {% endif %}
 
+        {% if monthly_generation_records %}
+        <h2 class="section-title">Monthly Generation Records</h2>
+        <p class="section-description">
+            The following table displays the month when generation of each fuel peaked in absolute terms.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="fuel-col">Fuel</th>
+                    <th class="num-col">Peak Month</th>
+                    <th class="num-col">Generation (TWh)</th>
+                    <th class="num-col">Previous Peak</th>
+                    <th class="num-col">Previous Generation (TWh)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in monthly_generation_records %}
+                <tr>
+                    <td class="fuel-col">
+                        <a href="{% url 'country_fuel_detail' country.code row.fuel.type %}"
+                            style="text-decoration: none; color: inherit; border-bottom: 1px dashed var(--accent-color);">
+                            {{ row.fuel.type }}
+                        </a>
+                    </td>
+                    <td class="num-col">
+                        {{ row.peak_month|date:"F Y" }}
+                    </td>
+                    <td class="num-col">
+                        {{ row.peak_generation|floatformat:2 }}
+                    </td>
+                    <td class="num-col">
+                        {% if row.previous_peak_month %}
+                        {{ row.previous_peak_month|date:"F Y" }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="num-col">
+                        {% if row.previous_peak_generation is not None %}
+                        {{ row.previous_peak_generation|floatformat:2 }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </main>
 </body>
 

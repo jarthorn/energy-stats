@@ -1,5 +1,13 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear, MonthlyGenerationData
+from .models import (
+    Country,
+    CountryFuel,
+    CountryFuelYear,
+    Fuel,
+    FuelYear,
+    MonthlyGenerationData,
+    MonthlyGenerationRecord,
+)
 import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -59,14 +67,44 @@ def country_detail(request, code):
 
     fastest_growing_pct = max_growth
 
+    # Build monthly generation record rows: most recent two "generation" records per fuel
+    monthly_record_rows = []
+    ordered_country_fuels = country_fuels.order_by("-generation_latest_12_months")
+
+    for cf in ordered_country_fuels:
+        record_qs = MonthlyGenerationRecord.objects.filter(
+            country=country,
+            fuel=cf.fuel,
+            record_type="generation",
+        ).order_by("-date")
+
+        latest_record = record_qs.first()
+        if not latest_record:
+            continue
+
+        previous_record = record_qs[1] if record_qs.count() > 1 else None
+
+        monthly_record_rows.append(
+            {
+                "fuel": cf.fuel,
+                "peak_month": latest_record.date,
+                "peak_generation": latest_record.generation_twh,
+                "previous_peak_month": previous_record.date if previous_record else None,
+                "previous_peak_generation": (
+                    previous_record.generation_twh if previous_record else None
+                ),
+            }
+        )
+
     context = {
-        'country': country,
-        'country_fuels': country_fuels.order_by('-generation_latest_12_months'),
-        'yoy_growth_pct': yoy_growth_pct,
-        'start_date': start_date,
-        'largest_source': largest_source,
-        'fastest_growing_source': fastest_growing_source,
-        'fastest_growing_pct': fastest_growing_pct,
+        "country": country,
+        "country_fuels": ordered_country_fuels,
+        "yoy_growth_pct": yoy_growth_pct,
+        "start_date": start_date,
+        "largest_source": largest_source,
+        "fastest_growing_source": fastest_growing_source,
+        "fastest_growing_pct": fastest_growing_pct,
+        "monthly_generation_records": monthly_record_rows,
     }
     return render(request, 'core/country_detail.html', context)
 
