@@ -22,7 +22,7 @@ class Command(BaseCommand):
             return
 
         iea_countries = set()
-        
+
         try:
             with open(file_path, 'r', newline='', encoding='utf-8') as f:
                 reader = csv.reader(f)
@@ -32,23 +32,26 @@ class Command(BaseCommand):
                     header = next(reader)
                 else:
                     header = first_line
-                
+
                 # Header format assumed from filtered file: Country,Product,Flow,2000,2001...
+                country_column = header.index("Country")
                 for row in reader:
                     if row:
-                        iea_countries.add(row[0].strip())
+                        iea_countries.add(row[country_column].strip())
         except Exception as e:
             self.stderr.write(self.style.ERROR(f"Error reading CSV: {e}"))
             return
 
         db_countries = set(Country.objects.values_list('name', flat=True))
-        
+
         missing_countries = sorted(list(db_countries - iea_countries))
 
         if not missing_countries:
             self.stdout.write(self.style.SUCCESS("All countries in the database are present in the IEA data."))
         else:
-            self.stdout.write(self.style.WARNING(f"Found {len(missing_countries)} countries in the database missing from IEA data:"))
+            self.stdout.write(self.style.WARNING(
+                f"Found {len(missing_countries)} countries in the database missing from IEA data:")
+            )
             for country in missing_countries:
                 self.stdout.write(f"- {country}")
 
