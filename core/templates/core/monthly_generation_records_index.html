@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Stats - Electricity Records Explorer</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #ecf0f1;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+        }
+
+        h2.section-title {
+            margin-top: 10px;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 15px;
+        }
+
+        .section-description {
+            margin-top: 5px;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 160px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .filter-group input {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            padding: 8px 16px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            padding: 8px 16px;
+            background-color: #bdc3c7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary:hover {
+            background-color: #95a5a6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #fdfdfd;
+        }
+
+        .num-col {
+            text-align: right;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .pagination-links a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: var(--accent-color);
+        }
+
+        .pagination-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Electricity Records Explorer</h1>
+    </header>
+    <main>
+        <a href="{% url 'index' %}" class="btn-back">← Back to Home</a>
+
+        <h2 class="section-title">Monthly Generation Records</h2>
+        <p class="section-description">
+            Browse monthly electricity generation records across all countries and fuels.
+            Use the filters below to narrow down by country, fuel type, record type, or date range.
+        </p>
+
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <label for="country">Country (ISO-3)</label>
+                <input type="text" id="country" name="country" maxlength="3"
+                    value="{{ filters.country }}" placeholder="e.g. USA">
+            </div>
+            <div class="filter-group">
+                <label for="fuel_type">Fuel Type</label>
+                <input type="text" id="fuel_type" name="fuel_type"
+                    value="{{ filters.fuel_type }}" placeholder="e.g. Wind">
+            </div>
+            <div class="filter-group">
+                <label for="record_type">Record Type</label>
+                <input type="text" id="record_type" name="record_type"
+                    value="{{ filters.record_type }}" placeholder="generation or share">
+            </div>
+            <div class="filter-group">
+                <label for="date_from">Date From (YYYY-MM-DD)</label>
+                <input type="text" id="date_from" name="date_from"
+                    value="{{ filters.date_from }}" placeholder="2023-01-01">
+            </div>
+            <div class="filter-group">
+                <label for="date_to">Date To (YYYY-MM-DD)</label>
+                <input type="text" id="date_to" name="date_to"
+                    value="{{ filters.date_to }}" placeholder="2024-12-31">
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-primary">Apply Filters</button>
+                <a href="{% url 'monthly_generation_records_index' %}" class="btn-secondary">Clear</a>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Fuel</th>
+                    <th>Record Type</th>
+                    <th>Date</th>
+                    <th class="num-col">Generation (TWh)</th>
+                    <th class="num-col">Share of Generation (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in page_obj.object_list %}
+                <tr>
+                    <td>{{ record.country.name }} ({{ record.country.code }})</td>
+                    <td>{{ record.fuel.type }}</td>
+                    <td>{{ record.record_type|title }}</td>
+                    <td>{{ record.date|date:"F Y" }}</td>
+                    <td class="num-col">
+                        {% if record.record_type == "generation" %}
+                        {{ record.generation_twh|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                    <td class="num-col">
+                        {% if record.record_type == "share" %}
+                        {{ record.share_of_generation_pct|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #95a5a6; padding: 30px;">
+                        No records match the selected filters.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <div>
+                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} —
+                {{ page_obj.paginator.count }} records total.
+            </div>
+            <div class="pagination-links">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if filters.country %}&country={{ filters.country }}{% endif %}{% if filters.fuel_type %}&fuel_type={{ filters.fuel_type }}{% endif %}{% if filters.record_type %}&record_type={{ filters.record_type }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">Previous</a>
+                {% endif %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if filters.country %}&country={{ filters.country }}{% endif %}{% if filters.fuel_type %}&fuel_type={{ filters.fuel_type }}{% endif %}{% if filters.record_type %}&record_type={{ filters.record_type }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}">Next</a>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
+

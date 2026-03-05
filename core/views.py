@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from .models import (
     Country,
@@ -277,6 +278,58 @@ def fuel_detail(request, fuel_type):
         'country_fuels': country_fuels,
     }
     return render(request, 'core/fuel_detail.html', context)
+
+
+def monthly_generation_records_index(request):
+    """
+    Paginated explorer for MonthlyGenerationRecord objects with optional filters.
+    """
+    qs = MonthlyGenerationRecord.objects.select_related("country", "fuel").order_by("-date", "country__name")
+
+    country_code = request.GET.get("country")
+    fuel_type = request.GET.get("fuel_type")
+    record_type = request.GET.get("record_type")
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+
+    if country_code:
+        qs = qs.filter(country__code=country_code.upper())
+
+    if fuel_type:
+        qs = qs.filter(fuel__type=fuel_type)
+
+    if record_type:
+        qs = qs.filter(record_type=record_type)
+
+    if date_from:
+        try:
+            parsed_from = datetime.date.fromisoformat(date_from)
+            qs = qs.filter(date__gte=parsed_from)
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            parsed_to = datetime.date.fromisoformat(date_to)
+            qs = qs.filter(date__lte=parsed_to)
+        except ValueError:
+            pass
+
+    paginator = Paginator(qs, 100)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "page_obj": page_obj,
+        "filters": {
+            "country": country_code or "",
+            "fuel_type": fuel_type or "",
+            "record_type": record_type or "",
+            "date_from": date_from or "",
+            "date_to": date_to or "",
+        },
+    }
+    return render(request, "core/monthly_generation_records_index.html", context)
 
 def _growth_rate(latest, previous):
     if previous > 0:
