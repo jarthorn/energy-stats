@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 raise CommandError(str(exc)) from exc
         else:
             # Default to all countries that have data in our staging table
-            country_codes = list(
+            country_codes = set[str](
                 MonthlyGenerationData.objects.values_list("country_code", flat=True).distinct()
             )
 
@@ -82,8 +82,7 @@ class Command(BaseCommand):
             country_obj = _load_country(code, country_name, country_metrics, latest_month)
 
             # 3. Transform & Load: Iterate through fuel types
-            fuel_types = records.values_list("fuel_type", flat=True).distinct()
-
+            fuel_types = set[str](records.values_list("fuel_type", flat=True).distinct())
             for fuel_type in fuel_types:
                 if not fuel_type:
                     continue
