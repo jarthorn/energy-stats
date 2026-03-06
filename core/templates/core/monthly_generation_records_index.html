@@ -95,11 +95,16 @@
             margin-bottom: 4px;
         }
 
-        .filter-group input {
+        .filter-group input,
+        .filter-group select {
             padding: 6px 8px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
             font-size: 0.9rem;
+        }
+
+        .filter-group select {
+            min-width: 140px;
         }
 
         .filter-actions {
@@ -200,19 +205,31 @@
 
         <form method="get" class="filter-form">
             <div class="filter-group">
-                <label for="country">Country (ISO-3)</label>
-                <input type="text" id="country" name="country" maxlength="3"
-                    value="{{ filters.country }}" placeholder="e.g. USA">
+                <label for="country">Country</label>
+                <select id="country" name="country">
+                    <option value="">All</option>
+                    {% for code, label in country_choices %}
+                    <option value="{{ code }}" {% if filters.country == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="filter-group">
                 <label for="fuel_type">Fuel Type</label>
-                <input type="text" id="fuel_type" name="fuel_type"
-                    value="{{ filters.fuel_type }}" placeholder="e.g. Wind">
+                <select id="fuel_type" name="fuel_type">
+                    <option value="">All</option>
+                    {% for ft in fuel_type_choices %}
+                    <option value="{{ ft }}" {% if filters.fuel_type == ft %}selected{% endif %}>{{ ft }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="filter-group">
                 <label for="record_type">Record Type</label>
-                <input type="text" id="record_type" name="record_type"
-                    value="{{ filters.record_type }}" placeholder="generation or share">
+                <select id="record_type" name="record_type">
+                    <option value="">All</option>
+                    {% for value, label in record_type_choices %}
+                    <option value="{{ value }}" {% if filters.record_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="filter-group">
                 <label for="date_from">Date From (YYYY-MM-DD)</label>

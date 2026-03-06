@@ -319,15 +319,35 @@ def monthly_generation_records_index(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    # Build dropdown choices from records in the database
+    country_choices = [
+        (c["country__code"], f"{c['country__name']} ({c['country__code']})")
+        for c in MonthlyGenerationRecord.objects.values("country__code", "country__name")
+        .distinct()
+        .order_by("country__name")
+    ]
+    fuel_type_choices = list(
+        MonthlyGenerationRecord.objects.values_list("fuel__type", flat=True)
+        .distinct()
+        .order_by("fuel__type")
+    )
+    record_type_choices = [
+        ("generation", "Generation"),
+        ("share", "Share"),
+    ]
+
     context = {
         "page_obj": page_obj,
         "filters": {
-            "country": country_code or "",
+            "country": country_code.upper() if country_code else "",
             "fuel_type": fuel_type or "",
             "record_type": record_type or "",
             "date_from": date_from or "",
             "date_to": date_to or "",
         },
+        "country_choices": country_choices,
+        "fuel_type_choices": fuel_type_choices,
+        "record_type_choices": record_type_choices,
     }
     return render(request, "core/monthly_generation_records_index.html", context)
 
