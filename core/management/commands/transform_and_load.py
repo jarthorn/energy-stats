@@ -12,10 +12,13 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import logging
 from collections import defaultdict
 from datetime import date
+from pathlib import Path
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Sum
 
@@ -341,6 +344,9 @@ def _apply_rankings(stdout) -> None:
             }
         )
 
+    stdout.write("Updating fuel summaries from data/fuel-summaries.json...")
+    _apply_fuel_summaries(stdout)
+
 
 def _load_annual_data(country_obj: Country, records) -> None:
     """
@@ -398,3 +404,33 @@ def _load_annual_data(country_obj: Country, records) -> None:
                     "yoy_growth": yoy_growth,
                 },
             )
+
+
+def _apply_fuel_summaries(stdout) -> None:
+    """
+    Populate Fuel.summary from the JSON metadata file.
+    The JSON value always overrides the existing value in the database.
+    Fuels missing a summary are set to blank.
+    """
+    summaries_path = Path(settings.BASE_DIR) / "data" / "fuel-summaries.json"
+
+    if not summaries_path.exists():
+        stdout.write(
+            f"  fuel-summaries.json not found at {summaries_path}. "
+            "Skipping fuel summary update."
+        )
+        return
+
+    try:
+        with summaries_path.open(encoding="utf-8") as fh:
+            summaries: dict[str, str] = json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        stdout.write(f"  Failed to load fuel summaries: {exc}. Skipping.")
+        return
+
+    # Prefer data file value over existing value in the database, if present.
+    for fuel in Fuel.objects.all():
+        summary = summaries.get(fuel.type, "")
+        if summary:
+            fuel.summary = summary
+            fuel.save(update_fields=["summary"])

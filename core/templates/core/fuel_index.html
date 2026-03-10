@@ -29,7 +29,6 @@
                 <th class="num-col">All Time (TWh)</th>
                 <th>Top Country (Gen)</th>
                 <th>Top Country (Share)</th>
-                <th>Summary</th>
             </tr>
         </thead>
         <tbody>
@@ -60,9 +59,6 @@
                     {% else %}
                     -
                     {% endif %}
-                </td>
-                <td style="font-size: 0.9em; color: #666; max-width: 300px;">
-                    {{ fuel.summary|truncatewords:20 }}
                 </td>
             </tr>
             {% endfor %}
