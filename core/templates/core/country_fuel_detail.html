@@ -15,10 +15,15 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'country_detail' country.code %}" class="btn-back">
-        <span class="btn-icon">←</span>
-        Back to {{ country.name }}
-    </a>
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_index' %}">Countries</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_detail' country.code %}">{{ country.name }}</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">{{ fuel.type }}</span>
+    </nav>
 
     <div class="summary-line">
         {{ country.name }} • {{ fuel.type }} • Latest Month: {{ country_fuel.latest_month|date:"F Y" }}

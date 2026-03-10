@@ -15,10 +15,11 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'index' %}" class="btn-back">
-        <span class="btn-icon">←</span>
-        Back to Home
-    </a>
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">Countries</span>
+    </nav>
 
     <table>
         <thead>

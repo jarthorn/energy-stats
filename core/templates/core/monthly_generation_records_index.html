@@ -15,10 +15,11 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'index' %}" class="btn-back">
-        <span class="btn-icon">←</span>
-        Back to Home
-    </a>
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">Records</span>
+    </nav>
 
     <h2 class="section-title">Monthly generation records</h2>
     <p class="section-description">

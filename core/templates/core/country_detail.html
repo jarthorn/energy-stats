@@ -15,10 +15,13 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'country_index' %}" class="btn-back">
-        <span class="btn-icon">←</span>
-        Back to Countries
-    </a>
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_index' %}">Countries</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">{{ country.name }}</span>
+    </nav>
 
     <div class="dashboard">
         <!-- Rank -->

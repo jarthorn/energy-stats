@@ -169,6 +169,35 @@
             margin-top: 12px;
         }
 
+        .breadcrumbs {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            margin-bottom: 16px;
+        }
+
+        .breadcrumbs a {
+            color: var(--muted-text);
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(46, 204, 113, 0.6);
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--link-color);
+        }
+
+        .breadcrumbs-separator {
+            color: #c5ced8;
+        }
+
+        .breadcrumbs-current {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
         .btn,
         .btn-back,
         .btn-primary,

@@ -15,10 +15,13 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'fuel_index' %}" class="btn-back">
-        <span class="btn-icon">←</span>
-        Back to Fuel Explorer
-    </a>
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'fuel_index' %}">Fuels</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">{{ fuel.type }}</span>
+    </nav>
 
     <div class="summary-box">
         <p>{{ fuel.summary }}</p>
