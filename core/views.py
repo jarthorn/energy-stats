@@ -13,6 +13,9 @@ import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+BAR_CHART_COLOR = "#2ecc71"
+SCATTER_CHART_COLOR = "#cc2e89"
+
 def index(request):
     return render(request, 'core/index.html')
 
@@ -129,11 +132,11 @@ def country_fuel_detail(request, code, fuel_type):
 
         # Add traces
         fig.add_trace(
-            go.Bar(x=years, y=generations, name="Generation (TWh)", marker_color="#3498db"),
+            go.Bar(x=years, y=generations, name="Generation (TWh)", marker_color=BAR_CHART_COLOR),
             secondary_y=False,
         )
         fig.add_trace(
-            go.Scatter(x=years, y=shares, name="Share (%)", line=dict(color="#e74c3c", width=3)),
+            go.Scatter(x=years, y=shares, name="Share (%)", line=dict(color=SCATTER_CHART_COLOR, width=3)),
             secondary_y=True,
         )
 
@@ -196,7 +199,7 @@ def country_fuel_detail(request, code, fuel_type):
                     y=recent_values,
                     mode="lines+markers",
                     name="Latest 12 months",
-                    line=dict(color="#3498db", width=3),
+                    line=dict(color=SCATTER_CHART_COLOR, width=3),
                 )
             )
 
@@ -207,7 +210,7 @@ def country_fuel_detail(request, code, fuel_type):
                         y=previous_values,
                         mode="lines+markers",
                         name="Previous 12 months",
-                        line=dict(color="#95a5a6", width=2, dash="dash"),
+                        line=dict(color=SCATTER_CHART_COLOR, width=2, dash="dash"),
                     )
                 )
 
@@ -248,11 +251,11 @@ def fuel_detail(request, fuel_type):
 
         # Add traces
         fig.add_trace(
-            go.Bar(x=years, y=generations, name="Global Gen (TWh)", marker_color='#3498db'),
+            go.Bar(x=years, y=generations, name="Global Gen (TWh)", marker_color=BAR_CHART_COLOR),
             secondary_y=False,
         )
         fig.add_trace(
-            go.Scatter(x=years, y=shares, name="Global Share (%)", line=dict(color='#e74c3c', width=3)),
+            go.Scatter(x=years, y=shares, name="Global Share (%)", line=dict(color=SCATTER_CHART_COLOR, width=3)),
             secondary_y=True,
         )
 
