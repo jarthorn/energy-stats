@@ -36,7 +36,7 @@
             {% for fuel in fuels %}
             <tr onclick="window.location.href='{% url 'fuel_detail' fuel.type %}';" style="cursor: pointer;">
                 <td>{{ fuel.rank }}</td>
-                <td style="font-weight: 600;">
+                <td class="primary-col">
                     {{ fuel.type }}
                 </td>
                 <td class="num-col">{{ fuel.generation_latest_12_months|floatformat:"2g" }}</td>
