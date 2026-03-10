@@ -21,7 +21,7 @@
         <span class="breadcrumbs-current">Countries</span>
     </nav>
 
-    <table>
+    <table class="data-table">
         <thead>
             <tr>
                 <th>Rank</th>
@@ -37,7 +37,7 @@
             {% for country in countries %}
             <tr onclick="window.location.href='{% url 'country_detail' country.code %}';" style="cursor: pointer;">
                 <td>{{ country.electricity_rank }}</td>
-                <td>{{ country.name }}</td>
+                <td class="primary-col">{{ country.name }}</td>
                 <td>{{ country.latest_month|date:"M Y" }}</td>
                 <td class="num-col">{{ country.generation_latest_12_months|floatformat:"2g" }}</td>
                 <td class="num-col">{{ country.generation_previous_12_months|floatformat:"2g" }}</td>

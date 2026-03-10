@@ -34,7 +34,7 @@
     {% endif %}
 
     <h2 class="section-title">Country distribution (latest 12 months)</h2>
-    <table>
+    <table class="data-table">
         <thead>
             <tr>
                 <th>Country</th>
@@ -48,7 +48,7 @@
             {% for cf in country_fuels %}
             <tr onclick="window.location.href='{% url 'country_fuel_detail' cf.country.code fuel.type %}';"
                 style="cursor: pointer;">
-                <td style="font-weight: 600; color: var(--link-color);">{{ cf.country.name }}</td>
+                <td class="primary-col">{{ cf.country.name }}</td>
                 <td class="num-col">{{ cf.generation_latest_12_months|floatformat:"2g" }}</td>
                 <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
                 <td

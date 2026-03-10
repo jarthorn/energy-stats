@@ -111,7 +111,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th rowspan="2" class="fuel-col">Fuel Type</th>
+                <th rowspan="2" class="sub-heading">Fuel Type</th>
                 <th colspan="3" class="sub-heading">Monthly Snapshot</th>
                 <th colspan="3" class="sub-heading">Yearly Snapshot (Last 12m)</th>
             </tr>
@@ -127,7 +127,7 @@
         <tbody>
             {% for cf in country_fuels %}
             <tr>
-                <td class="fuel-col">
+                <td class="primary-col">
                     <a href="{% url 'country_fuel_detail' country.code cf.fuel.type %}"
                         style="text-decoration: none; color: inherit; border-bottom: 1px dashed rgba(46, 204, 113, 0.6);">
                         {{ cf.fuel.type }}
@@ -172,7 +172,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th class="fuel-col">Fuel</th>
+                <th class="primary-col">Fuel</th>
                 <th class="num-col">Peak Month</th>
                 <th class="num-col">Generation (TWh)</th>
                 <th class="num-col">Previous Peak</th>
@@ -182,7 +182,7 @@
         <tbody>
             {% for row in monthly_generation_records %}
             <tr>
-                <td class="fuel-col">
+                <td class="primary-col">
                     <a href="{% url 'country_fuel_detail' country.code row.fuel.type %}"
                         style="text-decoration: none; color: inherit; border-bottom: 1px dashed rgba(46, 204, 113, 0.6);">
                         {{ row.fuel.type }}

@@ -128,7 +128,7 @@
         }
 
         .page-surface {
-            background: radial-gradient(circle at top right, rgba(46, 204, 113, 0.08), transparent 60%), var(--card-bg);
+            background: linear-gradient(to left, rgba(46, 204, 113, 0.08), transparent 60%), var(--card-bg);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-soft);
             padding: 26px 26px 28px;
@@ -335,21 +335,21 @@
             align-self: flex-start;
         }
 
-        table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 14px;
             font-size: 0.9rem;
         }
 
-        th,
-        td {
+        .data-table th,
+        .data-table td {
             padding: 10px 10px;
             border-bottom: 1px solid var(--border-color);
             text-align: left;
         }
 
-        th {
+        .data-table th {
             background-color: #f6f8fc;
             color: var(--primary-color);
             font-weight: 600;
@@ -358,13 +358,18 @@
             letter-spacing: 0.06em;
         }
 
-        tr:hover {
+        .data-table tr:hover {
             background-color: #f9fbff;
         }
 
         .num-col {
             text-align: right;
         }
+
+        .primary-col {
+            font-weight: 600;
+        }
+
 
         .growth-positive,
         .positive {
