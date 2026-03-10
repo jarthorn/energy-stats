@@ -1,132 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "core/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Stats - Home</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #ecf0f1;
-            --text-color: #333;
-        }
+{% block title %}Energy Stats - Home{% endblock %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        Global Energy Statistics
+        <span class="page-pill">Future of clean power</span>
+    </div>
+    <div class="page-subtitle">
+        Explore electricity data to understand how countries are moving towards a lower‑carbon grid.
+    </div>
+{% endblock %}
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-
-        main {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .hero {
-            margin-bottom: 2rem;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-        }
-
-        .features {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .feature-card {
-            flex: 1 1 300px;
-            padding: 20px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-card h3 {
-            margin-top: 0;
-            color: var(--primary-color);
-        }
-
-        .btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: var(--accent-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #2980b9;
-        }
-    </style>
-</head>
-
-<body>
-    <header>
-        <h1>Global Energy Statistics</h1>
-    </header>
-    <main>
-        <div class="hero">
-            <h2>Welcome to Energy Stats</h2>
-            <p>Explore comprehensive data on electricity generation worldwide. Analyze trends by country or fuel source
-                to understand the global energy landscape.</p>
+{% block content %}
+    <div class="hero">
+        <div class="hero-copy">
+            <h2>See the energy transition in the data</h2>
+            <p>
+                Browse country, fuel, and record views built from primary sources.
+                Compare low‑carbon progress and growth trends across the world.
+            </p>
         </div>
-
-        <div class="features">
-            <div class="feature-card">
-                <h3>Country Explorer</h3>
-                <p>Select a country to view detailed energy statistics, generation mix, and historical trends.</p>
-                <a href="{% url 'country_index' %}" class="btn">Explore Countries</a>
+        <div class="hero-grid">
+            <div class="hero-chip">
+                <div class="hero-chip-title">Country‑level insight</div>
+                <div class="hero-chip-text">Follow generation, mix, and growth for each grid.</div>
             </div>
-            <div class="feature-card">
-                <h3>Fuel Explorer</h3>
-                <p>Analyze global usage of specific energy sources like Wind, Solar, Hydro, Gas, and more.</p>
-                <a href="{% url 'fuel_index' %}" class="btn">Explore Fuels</a>
+            <div class="hero-chip">
+                <div class="hero-chip-title">Fuel transition</div>
+                <div class="hero-chip-text">See how wind, solar, hydro and other fuels evolve.</div>
             </div>
-            <div class="feature-card">
-                <h3>Electricity Records Explorer</h3>
-                <p>Discover when each country and fuel set new records for electricity generation and share.</p>
-                <a href="{% url 'monthly_generation_records_index' %}" class="btn">Explore Records</a>
+            <div class="hero-chip">
+                <div class="hero-chip-title">Record months</div>
+                <div class="hero-chip-text">Track when new highs in generation or share are set.</div>
+            </div>
+            <div class="hero-chip">
+                <div class="hero-chip-title">Reproducible data</div>
+                <div class="hero-chip-text">All statistics are derived from external primary sources.</div>
             </div>
         </div>
-    </main>
-</body>
+    </div>
 
-</html>
+    <div class="features">
+        <div class="feature-card" onclick="window.location.href='{% url 'country_index' %}';">
+            <h3>Country Explorer</h3>
+            <p>Select a country to view detailed energy statistics, generation mix, and historical trends.</p>
+            <a href="{% url 'country_index' %}" class="btn">
+                <span class="btn-icon">🌍</span>
+                Explore Countries
+            </a>
+        </div>
+        <div class="feature-card" onclick="window.location.href='{% url 'fuel_index' %}';">
+            <h3>Fuel Explorer</h3>
+            <p>Analyze global usage of specific energy sources like wind, solar, hydro, gas, and more.</p>
+            <a href="{% url 'fuel_index' %}" class="btn">
+                <span class="btn-icon">⚡</span>
+                Explore Fuels
+            </a>
+        </div>
+        <div class="feature-card" onclick="window.location.href='{% url 'monthly_generation_records_index' %}';">
+            <h3>Electricity Records Explorer</h3>
+            <p>Discover when each country and fuel set new records for electricity generation and share.</p>
+            <a href="{% url 'monthly_generation_records_index' %}" class="btn">
+                <span class="btn-icon">📈</span>
+                Explore Records
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,410 +1,213 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "core/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Stats - {{ country.name }}</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #ecf0f1;
-            --text-color: #333;
-            --border-color: #ddd;
-        }
+{% block title %}Energy Stats - {{ country.name }}{% endblock %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        {{ country.name }} Energy Stats
+        <span class="page-pill">Country overview</span>
+    </div>
+    <div class="page-subtitle">
+        Latest electricity generation, low‑carbon share and fuel mix for {{ country.name }}.
+    </div>
+</div>
+{% endblock %}
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
+{% block content %}
+    <a href="{% url 'country_index' %}" class="btn-back">
+        <span class="btn-icon">←</span>
+        Back to Countries
+    </a>
 
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-back {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 8px 15px;
-            background-color: #95a5a6;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
-        }
-
-        .btn-back:hover {
-            background-color: #7f8c8d;
-        }
-
-        .dashboard {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .gauge-card {
-            flex: 1 1 200px;
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            position: relative;
-            cursor: help;
-        }
-
-        .gauge-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-
-        .gauge-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .gauge-subtext {
-            font-size: 0.8rem;
-            color: #95a5a6;
-            margin-top: 5px;
-        }
-
-        /* Tooltip container */
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 110%;
-            /* Place above the card */
-            left: 50%;
-            margin-left: -110px;
-            /* Center the tooltip */
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.85rem;
-            font-weight: normal;
-            line-height: 1.4;
-            pointer-events: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Tooltip arrow */
-        .tooltip .tooltiptext::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-
-        .gauge-card:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .positive {
-            color: #27ae60;
-        }
-
-        .negative {
-            color: #c0392b;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            font-size: 0.95rem;
-        }
-
-        .data-table th {
-            background-color: #f8f9fa;
-            color: var(--primary-color);
-            font-weight: 600;
-            padding: 12px 15px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .data-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .data-table tr:hover {
-            background-color: #fdfdfd;
-        }
-
-        .sub-heading {
-            text-align: center !important;
-            background-color: #f1f3f5 !important;
-            border-bottom: 1px solid var(--border-color) !important;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .fuel-col {
-            text-align: left;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .num-col {
-            text-align: right;
-        }
-
-        h2.section-title {
-            margin-top: 40px;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            border-left: 4px solid var(--accent-color);
-            padding-left: 15px;
-        }
-        .section-description {
-            margin-top: 5px;
-            color: #7f8c8d;
-            font-size: 0.95rem;
-        }
-    </style>
-</head>
-
-<body>
-    <header>
-        <h1>{{ country.name }} Energy Stats</h1>
-    </header>
-    <main>
-        <a href="{% url 'country_index' %}" class="btn-back">← Back to Countries</a>
-
-        <div class="dashboard">
-            <!-- Rank -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">Global Rank</div>
-                <div class="gauge-value">#{{ country.electricity_rank }}</div>
-                <span class="tooltiptext">This country's rank as an electricity producer globally.</span>
-            </div>
-
-            <!-- Generation -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">Total Generation</div>
-                <div class="gauge-value">{{ country.generation_latest_12_months|floatformat:"1g" }} TWh</div>
-                {% if start_date and country.latest_month %}
-                <div class="gauge-subtext">{{ start_date|date:"M Y" }} - {{ country.latest_month|date:"M Y" }}</div>
-                {% endif %}
-                <span class="tooltiptext">Sum of electricity generation in the most recent 12 months.</span>
-            </div>
-
-            <!-- Low Carbon Share -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">Low Carbon Share</div>
-                <div class="gauge-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
-                <span class="tooltiptext">Percentage of this country's electricity supplied by low carbon
-                    sources.</span>
-            </div>
-
-            <!-- YoY Growth -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">YoY Growth</div>
-                <div
-                    class="gauge-value {% if yoy_growth_pct > 0 %}positive{% elif yoy_growth_pct < 0 %}negative{% endif %}">
-                    {% if yoy_growth_pct > 0 %}+{% endif %}{{ yoy_growth_pct|floatformat:2 }}%
-                </div>
-                <span class="tooltiptext">Year-over-year growth rate compared to the previous 12-month period.</span>
-            </div>
-
-            <!-- Largest Source -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">Main Electricity Source</div>
-                <div class="gauge-value">
-                    {% if largest_source %}
-                    <a href="{% url 'country_fuel_detail' country.code largest_source.fuel.type %}"
-                        style="text-decoration: none; color: inherit; border-bottom: 2px solid var(--accent-color);">
-                        {{ largest_source.fuel.type }}
-                    </a>
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                <div class="gauge-subtext">{{ largest_source.share|floatformat:"1g" }}% of total generation</div>
-
-                {% if largest_source %}
-                <div class="gauge-subtext">{{ largest_source.generation_latest_12_months|floatformat:"1g" }} TWh</div>
-                {% endif %}
-                <span class="tooltiptext">The power source that generated the most electricity in the last 12
-                    months.</span>
-            </div>
-
-            <!-- Fastest Growing Source -->
-            <div class="gauge-card tooltip">
-                <div class="gauge-label">Fastest Growing Source</div>
-                <div class="gauge-value">
-                    {% if fastest_growing_source %}
-                    <a href="{% url 'country_fuel_detail' country.code fastest_growing_source.fuel.type %}"
-                        style="text-decoration: none; color: inherit; border-bottom: 2px solid var(--accent-color);">
-                        {{ fastest_growing_source.fuel.type }}
-                    </a>
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                {% if fastest_growing_pct is not None %}
-                <div
-                    class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
-                    {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}% YoY
-                </div>
-                {% endif %}
-                <span class="tooltiptext">The power source with the highest year-over-year growth rate over the past 12
-                    months.</span>
-            </div>
+    <div class="dashboard">
+        <!-- Rank -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Global Rank</div>
+            <div class="gauge-value">#{{ country.electricity_rank }}</div>
+            <span class="tooltiptext">This country's rank as an electricity producer globally.</span>
         </div>
 
-        {% if country.latest_month %}
-        <h2 class="section-title">Electricity Mix for {{ country.latest_month|date:"F Y" }}</h2>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th rowspan="2" class="fuel-col">Fuel Type</th>
-                    <th colspan="3" class="sub-heading">Monthly Snapshot</th>
-                    <th colspan="3" class="sub-heading">Yearly Snapshot (Last 12m)</th>
-                </tr>
-                <tr>
-                    <th class="num-col">Generation</th>
-                    <th class="num-col">Share</th>
-                    <th class="num-col">YoY Growth</th>
-                    <th class="num-col">Total Generation</th>
-                    <th class="num-col">Share</th>
-                    <th class="num-col">Annual Growth</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cf in country_fuels %}
-                <tr>
-                    <td class="fuel-col">
-                        <a href="{% url 'country_fuel_detail' country.code cf.fuel.type %}"
-                            style="text-decoration: none; color: inherit; border-bottom: 1px dashed var(--accent-color);">
-                            {{ cf.fuel.type }}
-                        </a>
-                    </td>
-                    <td class="num-col">{{ cf.generation_latest_month|floatformat:2 }} TWh</td>
-                    <td class="num-col">{{ cf.share_latest_month|floatformat:1 }}%</td>
-                    <td
-                        class="num-col {% if cf.month_yoy_growth > 0 %}positive{% elif cf.month_yoy_growth < 0 %}negative{% endif %}">
-                        {% if cf.month_yoy_growth is not None %}
-                        {% if cf.month_yoy_growth > 0 %}+{% endif %}{{ cf.month_yoy_growth|floatformat:1 }}%
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                    <td class="num-col">{{ cf.generation_latest_12_months|floatformat:2 }} TWh</td>
-                    <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
-                    <td
-                        class="num-col {% if cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth < 0 %}negative{% endif %}">
-                        {% if cf.annual_yoy_growth is not None %}
-                        {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" style="text-align: center; color: #95a5a6; padding: 40px;">No detailed fuel mix data
-                        available.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
+        <!-- Generation -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Total Generation</div>
+            <div class="gauge-value">{{ country.generation_latest_12_months|floatformat:"1g" }} TWh</div>
+            {% if start_date and country.latest_month %}
+            <div class="gauge-subtext">{{ start_date|date:"M Y" }} - {{ country.latest_month|date:"M Y" }}</div>
+            {% endif %}
+            <span class="tooltiptext">Sum of electricity generation in the most recent 12 months.</span>
+        </div>
 
-        {% if monthly_generation_records %}
-        <h2 class="section-title">Monthly Generation Records</h2>
-        <p class="section-description">
-            The following table displays the month when generation of each fuel peaked in absolute terms.
-        </p>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th class="fuel-col">Fuel</th>
-                    <th class="num-col">Peak Month</th>
-                    <th class="num-col">Generation (TWh)</th>
-                    <th class="num-col">Previous Peak</th>
-                    <th class="num-col">Previous Generation (TWh)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in monthly_generation_records %}
-                <tr>
-                    <td class="fuel-col">
-                        <a href="{% url 'country_fuel_detail' country.code row.fuel.type %}"
-                            style="text-decoration: none; color: inherit; border-bottom: 1px dashed var(--accent-color);">
-                            {{ row.fuel.type }}
-                        </a>
-                    </td>
-                    <td class="num-col">
-                        {{ row.peak_month|date:"F Y" }}
-                    </td>
-                    <td class="num-col">
-                        {{ row.peak_generation|floatformat:2 }}
-                    </td>
-                    <td class="num-col">
-                        {% if row.previous_peak_month %}
-                        {{ row.previous_peak_month|date:"F Y" }}
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                    <td class="num-col">
-                        {% if row.previous_peak_generation is not None %}
-                        {{ row.previous_peak_generation|floatformat:2 }}
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-    </main>
-</body>
+        <!-- Low Carbon Share -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Low‑carbon Share</div>
+            <div class="gauge-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+            <span class="tooltiptext">Percentage of this country's electricity supplied by low‑carbon sources.</span>
+        </div>
 
-</html>
+        <!-- YoY Growth -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">YoY Growth</div>
+            <div
+                class="gauge-value {% if yoy_growth_pct > 0 %}positive{% elif yoy_growth_pct < 0 %}negative{% endif %}">
+                {% if yoy_growth_pct > 0 %}+{% endif %}{{ yoy_growth_pct|floatformat:2 }}%
+            </div>
+            <span class="tooltiptext">Year‑over‑year growth rate compared to the previous 12‑month period.</span>
+        </div>
+
+        <!-- Largest Source -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Main Electricity Source</div>
+            <div class="gauge-value">
+                {% if largest_source %}
+                <a href="{% url 'country_fuel_detail' country.code largest_source.fuel.type %}"
+                    style="text-decoration: none; color: inherit; border-bottom: 2px solid rgba(46, 204, 113, 0.6);">
+                    {{ largest_source.fuel.type }}
+                </a>
+                {% else %}
+                N/A
+                {% endif %}
+            </div>
+            <div class="gauge-subtext">
+                {{ largest_source.share|floatformat:"1g" }}% of total generation
+            </div>
+
+            {% if largest_source %}
+            <div class="gauge-subtext">
+                {{ largest_source.generation_latest_12_months|floatformat:"1g" }} TWh
+            </div>
+            {% endif %}
+            <span class="tooltiptext">The power source that generated the most electricity in the last 12 months.</span>
+        </div>
+
+        <!-- Fastest Growing Source -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Fastest Growing Source</div>
+            <div class="gauge-value">
+                {% if fastest_growing_source %}
+                <a href="{% url 'country_fuel_detail' country.code fastest_growing_source.fuel.type %}"
+                    style="text-decoration: none; color: inherit; border-bottom: 2px solid rgba(46, 204, 113, 0.6);">
+                    {{ fastest_growing_source.fuel.type }}
+                </a>
+                {% else %}
+                N/A
+                {% endif %}
+            </div>
+            {% if fastest_growing_pct is not None %}
+            <div
+                class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
+                {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}% YoY
+            </div>
+            {% endif %}
+            <span class="tooltiptext">The power source with the highest year‑over‑year growth rate over the past 12 months.</span>
+        </div>
+    </div>
+
+    {% if country.latest_month %}
+    <h2 class="section-title">Electricity Mix for {{ country.latest_month|date:"F Y" }}</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th rowspan="2" class="fuel-col">Fuel Type</th>
+                <th colspan="3" class="sub-heading">Monthly Snapshot</th>
+                <th colspan="3" class="sub-heading">Yearly Snapshot (Last 12m)</th>
+            </tr>
+            <tr>
+                <th class="num-col">Generation</th>
+                <th class="num-col">Share</th>
+                <th class="num-col">YoY Growth</th>
+                <th class="num-col">Total Generation</th>
+                <th class="num-col">Share</th>
+                <th class="num-col">Annual Growth</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cf in country_fuels %}
+            <tr>
+                <td class="fuel-col">
+                    <a href="{% url 'country_fuel_detail' country.code cf.fuel.type %}"
+                        style="text-decoration: none; color: inherit; border-bottom: 1px dashed rgba(46, 204, 113, 0.6);">
+                        {{ cf.fuel.type }}
+                    </a>
+                </td>
+                <td class="num-col">{{ cf.generation_latest_month|floatformat:2 }} TWh</td>
+                <td class="num-col">{{ cf.share_latest_month|floatformat:1 }}%</td>
+                <td
+                    class="num-col {% if cf.month_yoy_growth > 0 %}positive{% elif cf.month_yoy_growth < 0 %}negative{% endif %}">
+                    {% if cf.month_yoy_growth is not None %}
+                    {% if cf.month_yoy_growth > 0 %}+{% endif %}{{ cf.month_yoy_growth|floatformat:1 }}%
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="num-col">{{ cf.generation_latest_12_months|floatformat:2 }} TWh</td>
+                <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
+                <td
+                    class="num-col {% if cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth < 0 %}negative{% endif %}">
+                    {% if cf.annual_yoy_growth is not None %}
+                    {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #95a5a6; padding: 40px;">No detailed fuel mix data
+                    available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if monthly_generation_records %}
+    <h2 class="section-title">Monthly Generation Records</h2>
+    <p class="section-description">
+        The following table displays the month when generation of each fuel peaked in absolute terms.
+    </p>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="fuel-col">Fuel</th>
+                <th class="num-col">Peak Month</th>
+                <th class="num-col">Generation (TWh)</th>
+                <th class="num-col">Previous Peak</th>
+                <th class="num-col">Previous Generation (TWh)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in monthly_generation_records %}
+            <tr>
+                <td class="fuel-col">
+                    <a href="{% url 'country_fuel_detail' country.code row.fuel.type %}"
+                        style="text-decoration: none; color: inherit; border-bottom: 1px dashed rgba(46, 204, 113, 0.6);">
+                        {{ row.fuel.type }}
+                    </a>
+                </td>
+                <td class="num-col">
+                    {{ row.peak_month|date:"F Y" }}
+                </td>
+                <td class="num-col">
+                    {{ row.peak_generation|floatformat:2 }}
+                </td>
+                <td class="num-col">
+                    {% if row.previous_peak_month %}
+                    {{ row.previous_peak_month|date:"F Y" }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="num-col">
+                    {% if row.previous_peak_generation is not None %}
+                    {{ row.previous_peak_generation|floatformat:2 }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% endblock %}
