@@ -30,14 +30,6 @@
     </div>
 
     <div class="dashboard">
-        <!-- Share -->
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Generation Share</div>
-            <div class="gauge-value">{{ country_fuel.share|floatformat:1 }}%</div>
-            <span class="tooltiptext">The average share of total generation from this fuel over the most recent 12
-                months.</span>
-        </div>
-
         <!-- Generation Latest Month -->
         <div class="gauge-card tooltip">
             <div class="gauge-label">Generation (Month)</div>
@@ -62,8 +54,18 @@
         <div class="gauge-card tooltip">
             <div class="gauge-label">Generation (Year)</div>
             <div class="gauge-value">{{ country_fuel.generation_latest_12_months|floatformat:"2g" }} TWh</div>
+            <div class="gauge-subtext">{{ country_fuel.previous_12_months_start|date:"M Y" }} - {{ country_fuel.latest_month|date:"M Y" }}</div>
             <span class="tooltiptext">Total electricity generation from this fuel over the most recent 12‑month
                 period.</span>
+        </div>
+
+        <!-- Share -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Generation Share</div>
+            <div class="gauge-value">{{ country_fuel.share|floatformat:1 }}%</div>
+            <div class="gauge-subtext">{{ country_fuel.previous_12_months_start|date:"M Y" }} - {{ country_fuel.latest_month|date:"M Y" }}</div>
+            <span class="tooltiptext">The average share of total generation from this fuel over the most recent 12
+                months.</span>
         </div>
 
         <!-- Annual YoY Growth -->

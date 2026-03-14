@@ -115,6 +115,16 @@ class CountryFuel(models.Model):
     class Meta:
         unique_together = [("country", "fuel")]
 
+    def previous_12_months_start(self):
+        if self.latest_month is None:
+            return None
+        year = self.latest_month.year
+        month = self.latest_month.month - 11
+        while month <= 0:
+            month += 12
+            year -= 1
+        return self.latest_month.replace(year=year, month=month, day=1)
+
     def __str__(self):
         return f"{self.country} - {self.fuel}"
 
