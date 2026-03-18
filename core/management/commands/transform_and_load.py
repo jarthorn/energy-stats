@@ -433,4 +433,12 @@ def _apply_fuel_summaries(stdout) -> None:
         summary = summaries.get(fuel.type, "")
         if summary:
             fuel.summary = summary
-            fuel.save(update_fields=["summary"])
+        top_country_fuel_generation = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_generation)
+        top_country_fuel_share = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_share)
+        country_fuel_summary = f" The country with the most generation from {fuel.type.lower()}"\
+            f" over the latest 12 months is {top_country_fuel_generation.country.name},"\
+            f" with {top_country_fuel_generation.generation_latest_12_months:,.0f} TWh."
+        country_fuel_summary += f" The country with the largest share of its generation from {fuel.type.lower()}"\
+            f" is {top_country_fuel_share.country.name} at {top_country_fuel_share.share:.1f}%."
+        fuel.summary += country_fuel_summary
+        fuel.save(update_fields=["summary"])
