@@ -195,8 +195,6 @@ def _is_flow_allowed(product, flow):
         return True
     elif _is_primary_energy(product) and flow == "Total energy supply (PJ)":
         return True
-    elif product == "Total" and flow == "Total energy supply (PJ)":
-        return True
     return False
 
 def _is_primary_energy(product):
