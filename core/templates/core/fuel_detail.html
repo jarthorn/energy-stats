@@ -2,6 +2,74 @@
 
 {% block title %}Energy Stats - {{ fuel.type }}{% endblock %}
 
+{% block extra_styles %}
+    <style>
+        .top-countries-card {
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(15, 35, 52, 0.06);
+            padding: 16px 16px 14px;
+            box-shadow: 0 4px 14px rgba(15, 35, 52, 0.08);
+            margin-top: 16px;
+        }
+
+        .top-countries-card .section-title {
+            margin-top: 0;
+        }
+
+        .top-countries-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+        }
+
+        .top-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .top-panel {
+            display: none;
+        }
+
+        .top-panel.active {
+            display: block;
+        }
+
+        .rank-col {
+            width: 64px;
+        }
+
+        .rank-number {
+            display: inline-flex;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            background: linear-gradient(120deg, #2ecc71, #1abc9c);
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(26, 188, 156, 0.25);
+        }
+
+        .top-table .rank-number {
+            transform: translateY(0);
+        }
+
+        .top-table th.top-col-active {
+            background-color: rgba(46, 204, 113, 0.12);
+            border-bottom: 2px solid rgba(46, 204, 113, 0.55);
+        }
+
+        .top-table td.active-top-col {
+            font-weight: 800;
+        }
+    </style>
+{% endblock %}
+
 {% block page_header %}
 <div class="page-header">
     <div class="page-title">
@@ -33,6 +101,136 @@
     </div>
     {% endif %}
 
+    <div style="height: 16px;"></div>
+
+    <div class="top-countries-card">
+        <h2 class="section-title">Top Countries</h2>
+        <div class="section-description">Quickly compare which countries lead in generation, share, and growth for {{ fuel.type|lower }}.</div>
+
+        <div class="top-countries-toggles" role="tablist" aria-label="Top countries criterion">
+            <button type="button"
+                class="btn btn-primary top-toggle active top-toggle--generation"
+                data-target="generation">
+                Top Generation
+            </button>
+            <button type="button"
+                class="btn btn-secondary top-toggle top-toggle--share"
+                data-target="share">
+                Top Share
+            </button>
+            <button type="button"
+                class="btn btn-secondary top-toggle top-toggle--growth"
+                data-target="growth">
+                Fastest Growing
+            </button>
+        </div>
+
+        <div class="top-panel active" data-panel="generation">
+            <table class="data-table top-table">
+                <thead>
+                    <tr>
+                        <th class="rank-col">#</th>
+                        <th>Country</th>
+                        <th class="num-col top-col-active">Annual Generation (TWh)</th>
+                        <th class="num-col">Share of Country Mix</th>
+                        <th class="num-col">Annual Growth</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cf in top_generation_countries %}
+                        {% url 'country_fuel_detail' cf.country.code fuel.type as detail_url %}
+                        <tr onclick="window.location.href='{{ detail_url }}';"
+                            style="cursor: pointer;">
+                            <td class="rank-col">
+                                <span class="rank-number">{{ forloop.counter }}</span>
+                            </td>
+                            <td class="primary-col">{{ cf.country.name }}</td>
+                        <td class="num-col active-top-col">{{ cf.generation_latest_12_months|floatformat:"2g" }}</td>
+                        <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
+                        <td class="num-col {% if cf.annual_yoy_growth is not None and cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth is not None and cf.annual_yoy_growth < 0 %}negative{% endif %}">
+                            {% if cf.annual_yoy_growth is not None %}
+                                {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="top-panel" data-panel="share">
+            <table class="data-table top-table">
+                <thead>
+                    <tr>
+                        <th class="rank-col">#</th>
+                        <th>Country</th>
+                        <th class="num-col">AnnualGeneration (TWh)</th>
+                        <th class="num-col top-col-active">Share of Country Mix</th>
+                        <th class="num-col">Annual Growth</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cf in top_share_countries %}
+                        {% url 'country_fuel_detail' cf.country.code fuel.type as detail_url %}
+                        <tr onclick="window.location.href='{{ detail_url }}';"
+                            style="cursor: pointer;">
+                            <td class="rank-col">
+                                <span class="rank-number">{{ forloop.counter }}</span>
+                            </td>
+                            <td class="primary-col">{{ cf.country.name }}</td>
+                        <td class="num-col">{{ cf.generation_latest_12_months|floatformat:"2g" }}</td>
+                        <td class="num-col active-top-col">{{ cf.share|floatformat:1 }}%</td>
+                        <td class="num-col {% if cf.annual_yoy_growth is not None and cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth is not None and cf.annual_yoy_growth < 0 %}negative{% endif %}">
+                            {% if cf.annual_yoy_growth is not None %}
+                                {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="top-panel" data-panel="growth">
+            <table class="data-table top-table">
+                <thead>
+                    <tr>
+                        <th class="rank-col">#</th>
+                        <th>Country</th>
+                        <th class="num-col">Annual Generation (TWh)</th>
+                        <th class="num-col">Share of Country Mix</th>
+                        <th class="num-col top-col-active">Annual Growth</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cf in top_fastest_growing_countries %}
+                        {% url 'country_fuel_detail' cf.country.code fuel.type as detail_url %}
+                        <tr onclick="window.location.href='{{ detail_url }}';"
+                            style="cursor: pointer;">
+                            <td class="rank-col">
+                                <span class="rank-number">{{ forloop.counter }}</span>
+                            </td>
+                            <td class="primary-col">{{ cf.country.name }}</td>
+                        <td class="num-col">{{ cf.generation_latest_12_months|floatformat:"2g" }}</td>
+                        <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
+                        <td class="num-col active-top-col {% if cf.annual_yoy_growth is not None and cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth is not None and cf.annual_yoy_growth < 0 %}negative{% endif %}">
+                            {% if cf.annual_yoy_growth is not None %}
+                                {% if cf.annual_yoy_growth > 0 %}+{% endif %}{{ cf.annual_yoy_growth|floatformat:1 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <h2 class="section-title">Country distribution (latest 12 months)</h2>
     <table class="data-table">
         <thead>
@@ -46,7 +244,8 @@
         </thead>
         <tbody>
             {% for cf in country_fuels %}
-            <tr onclick="window.location.href='{% url 'country_fuel_detail' cf.country.code fuel.type %}';"
+            {% url 'country_fuel_detail' cf.country.code fuel.type as detail_url %}
+            <tr onclick="window.location.href='{{ detail_url }}';"
                 style="cursor: pointer;">
                 <td class="primary-col">{{ cf.country.name }}</td>
                 <td class="num-col">{{ cf.generation_latest_12_months|floatformat:"2g" }}</td>
@@ -64,4 +263,26 @@
             {% endfor %}
         </tbody>
     </table>
+    <script>
+        (function () {
+            const buttons = document.querySelectorAll('.top-toggle[data-target]');
+            const panels = document.querySelectorAll('.top-panel[data-panel]');
+            const showPanel = (target) => {
+                panels.forEach((p) => {
+                    const isActive = p.dataset.panel === target;
+                    p.classList.toggle('active', isActive);
+                });
+                buttons.forEach((b) => {
+                    const isActive = b.dataset.target === target;
+                    b.classList.toggle('active', isActive);
+                    b.classList.toggle('btn-primary', isActive);
+                    b.classList.toggle('btn-secondary', !isActive);
+                });
+            };
+
+            buttons.forEach((b) => {
+                b.addEventListener('click', () => showPanel(b.dataset.target));
+            });
+        })();
+    </script>
 {% endblock %}

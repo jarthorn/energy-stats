@@ -272,13 +272,38 @@ def fuel_detail(request, fuel_type):
 
         graph_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
 
-    # Fetch country distribution
-    country_fuels = CountryFuel.objects.filter(fuel=fuel).order_by('-generation_latest_12_months')
+    # Fetch country distribution (and also build "Top Countries" slices from it).
+    #
+    # We materialize once so we can reuse the same dataset for:
+    # - the full country table (ordered by generation)
+    # - the three top-ten lists (generation/share/annual YoY growth).
+    country_fuels = list(
+        CountryFuel.objects.filter(fuel=fuel)
+        .select_related("country")
+        .order_by("-generation_latest_12_months")
+    )
+
+    top_generation_countries = country_fuels[:10]
+
+    top_share_countries = sorted(
+        country_fuels,
+        key=lambda cf: cf.share if cf.share is not None else float("-inf"),
+        reverse=True,
+    )[:10]
+
+    top_fastest_growing_countries = sorted(
+        country_fuels,
+        key=lambda cf: cf.annual_yoy_growth if cf.annual_yoy_growth is not None else float("-inf"),
+        reverse=True,
+    )[:10]
 
     context = {
         'fuel': fuel,
         'graph_html': graph_html,
         'country_fuels': country_fuels,
+        'top_generation_countries': top_generation_countries,
+        'top_share_countries': top_share_countries,
+        'top_fastest_growing_countries': top_fastest_growing_countries,
     }
     return render(request, 'core/fuel_detail.html', context)
 
