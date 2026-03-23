@@ -107,7 +107,7 @@
     </div>
 
     {% if country.latest_month %}
-    <h2 class="section-title">Electricity Mix for {{ country.latest_month|date:"F Y" }}</h2>
+    <h2 class="section-title">Electricity Mix for {{country.name}}: {{ country.latest_month|date:"F Y" }}</h2>
     <table class="data-table">
         <thead>
             <tr>
