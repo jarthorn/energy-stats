@@ -46,7 +46,6 @@ ALLOWED_COUNTRIES = {
     "Japan",
     "Kazakhstan",
     "Kenya",
-    "Korea",
     "Kosovo",
     "Kuwait",
     "Kyrgyzstan",
@@ -102,16 +101,18 @@ ALLOWED_COUNTRIES = {
 # Feel free to add more mappings.
 COUNTRY_MAPPING = {
     "Czech Republic": "Czechia",
-    "People's Republic of China": "China",
-    "Republic of Turkiye": "Türkiye",
-    "Slovak Republic": "Slovakia",
-    "Korea": "South Korea",
+    "Turkiye": "Türkiye",
+    "US": "United States",
+    "Vietnam": "Viet Nam",
+    "Russian Federation": "Russia",
+    "Taiwan": "Taiwan (China)",
+    "Philippines": "The Philippines",
 }
 
 HEADER_MAPPING = {
-    "biodiesel_cons_pj": "biodiesel_consumption_ej",
-    "biofuels_cons_pj": "biofuels_consumption_ej",
-    "ethanol_cons_pj": "ethanol_consumption_ej",
+    "biodiesel_cons_pj": "biodiesel_cons_ej",
+    "biofuels_cons_pj": "biofuels_cons_ej",
+    "ethanol_cons_pj": "ethanol_cons_ej",
     "elect_twh": "electricity_ej",
 }
 
@@ -175,19 +176,31 @@ def process_csv(input_filepath, output_filepath):
             year = int(row[1])
 
             # Map the country name if it exists in our mapping
-            if country in COUNTRY_MAPPING:
-                country = COUNTRY_MAPPING[country]
+            country = COUNTRY_MAPPING.get(country, country)
+            if country not in ALLOWED_COUNTRIES:
+                continue
 
-            # Check filtering conditions
-            if country in ALLOWED_COUNTRIES and year >= MIN_YEAR:
-                # Update the country name in the row that will be written
+            if year >= MIN_YEAR:
+                # Make sure we write the mapped country name
                 row[0] = country
-                filtered_row = [row[i] for i in indices_to_keep if i < len(row)]
+                filtered_row = [_transform_value(header[i], row[i]) for i in indices_to_keep if i < len(row)]
                 writer.writerow(filtered_row)
                 rows_kept += 1
 
         print(f"Processed {rows_processed} data rows.")
         print(f"Kept {rows_kept} data rows.")
+
+def _transform_value(header, value):
+    """
+    Normalize all values to Exajoules
+    """
+    if (header in ("biodiesel_cons_pj", "biofuels_cons_pj", "ethanol_cons_pj")):
+        # Convert Petajoules to Exajoules
+        return float(value) / 1000.0
+    elif header == "elect_twh":
+        # Use conversion factor of 1 kWh = 3600 kJ used by the Energy Institute
+        return float(value) * 0.0036
+    return value
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
