@@ -7,6 +7,7 @@ from .models import (
     FuelYear,
     MonthlyGenerationData,
     MonthlyGenerationRecord,
+    CountryEnergyBalanceYear
 )
 
 @admin.register(MonthlyGenerationData)
@@ -19,7 +20,7 @@ class MonthlyGenerationDataAdmin(admin.ModelAdmin):
 class CountryAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'electricity_rank', 'generation_latest_12_months')
     search_fields = ('name', 'code')
-    ordering = ('electricity_rank',)
+    ordering = ('name',)
 
 @admin.register(Fuel)
 class FuelAdmin(admin.ModelAdmin):
@@ -51,3 +52,9 @@ class MonthlyGenerationRecordAdmin(admin.ModelAdmin):
     list_display = ('country', 'fuel', 'date', 'generation_twh', 'share_of_generation_pct')
     list_filter = ('country', 'fuel', 'date')
     search_fields = ('country__name', 'country__code', 'fuel__type')
+
+@admin.register(CountryEnergyBalanceYear)
+class CountryEnergyBalanceYearAdmin(admin.ModelAdmin):
+    list_display = ('country', 'year', 'total_supply', 'share_low_carbon', 'share_renewable', 'share_electricity')
+    list_filter = ('country', 'year',)
+    search_fields = ('country__name', 'country__code')
