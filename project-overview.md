@@ -11,3 +11,7 @@ A secondary objective is enabling the author to learn more about Python and Djan
 - Django 6.0.2.
 - SQLite
 - Ruff for python formatting. Please run ruff check and ruff format before committing.
+
+# Data sources
+
+This project uses source data from several different organizations. Since each organization has slightly varying methodologies, it is important that we never directly compare or combine data together from multiple sources. For electricity generation data, Ember is the preferred data source. For total energy supply and primary energy sources, we use data from the Energy Institute's data sets.
