@@ -119,6 +119,7 @@ HEADER_MAPPING = {
 COLUMNS_TO_KEEP = [
     "Country",
     "Year",
+    "ISO3166_alpha3",
     "biodiesel_cons_pj",
     "biofuels_cons_pj",
     "ethanol_cons_pj",
