@@ -144,7 +144,7 @@ def process_csv(input_filepath, output_filepath):
     Filtering Rules:
     - Omit rows where Country (Column A) is not in ALLOWED_COUNTRIES
     - Omit columns that we don't need
-    - Omit all year columns before MIN_YEAR
+    - Omit all year rows before MIN_YEAR
     """
     with open(input_filepath, 'r', newline='', encoding='utf-8-sig') as infile, \
          open(output_filepath, 'w', newline='', encoding='utf-8') as outfile:
@@ -166,9 +166,10 @@ def process_csv(input_filepath, output_filepath):
         # Process data rows
         rows_processed = 0
         rows_kept = 0
+        columns = len(header)
 
         for row in reader:
-            if not row or len(row) < 3:
+            if not row or len(row) < columns:
                 continue
 
             rows_processed += 1
@@ -183,7 +184,7 @@ def process_csv(input_filepath, output_filepath):
             if year >= MIN_YEAR:
                 # Make sure we write the mapped country name
                 row[0] = country
-                filtered_row = [_transform_value(header[i], row[i]) for i in indices_to_keep if i < len(row)]
+                filtered_row = [_transform_value(header[i], row[i]) for i in indices_to_keep]
                 writer.writerow(filtered_row)
                 rows_kept += 1
 
