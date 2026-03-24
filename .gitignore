@@ -1,5 +1,6 @@
 # Project specific files
 data/iea-world-energy-balances-2025.csv
+data/ei-world-consolidated-panel-2024.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
