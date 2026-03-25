@@ -8,7 +8,7 @@
         margin-bottom: 14px;
         font-size: 0.9rem;
         color: var(--muted-text);
-        max-width: 80ch;
+        max-width: 100ch;
     }
 
     .speedometer {
@@ -53,63 +53,6 @@
         <span class="breadcrumbs-current">{{ country.name }}</span>
     </nav>
 
-    <h2 class="section-title">Primary Energy Supply</h2>
-    <p class="primary-energy-intro">
-        Primary energy supply represents all energy available for use in a country:
-        domestic production plus imports minus exports. Values below come from the latest
-        available year in the Energy Institute's
-        <a href="https://www.energyinst.org/statistical-review/about">Statistical Review of World Energy</a>.
-        Note that electricity generation is not considered part of primary energy supply, but it does include the primary
-        energy used for electricity generation.
-    </p>
-    {% if primary_energy_balance %}
-    <div class="dashboard">
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Total Supply</div>
-            <div class="gauge-value">{{ primary_energy_balance.total_supply|floatformat:"0g" }} PJ</div>
-            <div class="gauge-subtext">Calendar year {{ primary_energy_balance.year }}</div>
-            <span class="tooltiptext">Total primary energy supply across coal, oil, gas, nuclear, and renewables.</span>
-        </div>
-
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Low-carbon Share</div>
-            <div class="speedometer" style="--value: {{ primary_energy_balance.share_low_carbon|floatformat:2 }};">
-                <div class="speedometer-value">{{ primary_energy_balance.share_low_carbon|floatformat:1 }}%</div>
-            </div>
-            <div class="gauge-subtext">Share of primary energy supply</div>
-            <span class="tooltiptext">Share of total primary energy supply from nuclear and renewable sources.</span>
-        </div>
-
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Renewable Share</div>
-            <div class="speedometer" style="--value: {{ primary_energy_balance.share_renewable|floatformat:2 }};">
-                <div class="speedometer-value">{{ primary_energy_balance.share_renewable|floatformat:1 }}%</div>
-            </div>
-            <div class="gauge-subtext">Share of primary energy supply</div>
-            <span class="tooltiptext">Share of total primary energy supply from renewable sources.</span>
-        </div>
-
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Electricity Share</div>
-            <div class="speedometer" style="--value: {{ primary_energy_balance.share_electricity|floatformat:2 }};">
-                <div class="speedometer-value">{{ primary_energy_balance.share_electricity|floatformat:1 }}%</div>
-            </div>
-            <div class="gauge-subtext">Electricity output as share of supply</div>
-            <span class="tooltiptext">Total electricity production as a percentage of primary energy supply.</span>
-        </div>
-    </div>
-
-    {% if primary_energy_supply_donut_html %}
-    <div class="graph-container">
-        <div class="graph-title">Primary energy supply for {{ country.name }} ({{ primary_energy_balance.year }})</div>
-        {{ primary_energy_supply_donut_html|safe }}
-    </div>
-    {% endif %}
-    {% else %}
-    <div class="summary-box">
-        No primary energy supply data available for this country yet.
-    </div>
-    {% endif %}
 
     <h2 class="section-title">Electricity Generation</h2>
     <div class="dashboard">
@@ -134,7 +77,13 @@
         <!-- Low Carbon Share -->
         <div class="gauge-card tooltip">
             <div class="gauge-label">Low‑carbon Share</div>
-            <div class="gauge-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+            {% if country.low_carbon_pct is not None %}
+            <div class="speedometer" style="--value: {{ country.low_carbon_pct|floatformat:2 }};">
+                <div class="speedometer-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+            </div>
+            {% else %}
+            <div class="gauge-value">-</div>
+            {% endif %}
             <div class="gauge-subtext">Share of electricity from non-fossil sources</div>
             <span class="tooltiptext">Percentage of this country's electricity supplied by low‑carbon sources.</span>
         </div>
@@ -253,6 +202,64 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
+
+    <h2 class="section-title">Primary Energy Supply</h2>
+    <p class="primary-energy-intro">
+        Primary energy supply represents all energy available for use in a country:
+        domestic production plus imports minus exports. Values below come from the latest
+        available year in the Energy Institute's
+        <a href="https://www.energyinst.org/statistical-review/about">Statistical Review of World Energy</a>.
+        Note that electricity is not considered part of primary energy supply, but it does include the primary
+        energy used for electricity generation.
+    </p>
+    {% if primary_energy_balance %}
+    <div class="dashboard">
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Total Supply</div>
+            <div class="gauge-value">{{ primary_energy_balance.total_supply|floatformat:"0g" }} PJ</div>
+            <div class="gauge-subtext">Calendar year {{ primary_energy_balance.year }}</div>
+            <span class="tooltiptext">Total primary energy supply across coal, oil, gas, nuclear, and renewables.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Low-carbon Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_low_carbon|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_low_carbon|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Share of primary energy supply</div>
+            <span class="tooltiptext">Share of total primary energy supply from nuclear and renewable sources.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Renewable Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_renewable|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_renewable|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Share of primary energy supply</div>
+            <span class="tooltiptext">Share of total primary energy supply from renewable sources.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Electricity Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_electricity|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_electricity|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Electricity output as share of supply</div>
+            <span class="tooltiptext">Total electricity production as a percentage of primary energy supply.</span>
+        </div>
+    </div>
+
+    {% if primary_energy_supply_donut_html %}
+    <div class="graph-container">
+        <div class="graph-title">Primary energy supply for {{ country.name }} ({{ primary_energy_balance.year }})</div>
+        {{ primary_energy_supply_donut_html|safe }}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="summary-box">
+        No primary energy supply data available for this country yet.
+    </div>
     {% endif %}
 
     {% if monthly_generation_records %}
