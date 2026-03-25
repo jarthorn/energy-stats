@@ -2,6 +2,36 @@
 
 {% block title %}Energy Stats - {{ country.name }}{% endblock %}
 
+{% block extra_styles %}
+    .primary-energy-intro {
+        margin-top: 6px;
+        margin-bottom: 14px;
+        font-size: 0.9rem;
+        color: var(--muted-text);
+        max-width: 80ch;
+    }
+
+    .speedometer {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 10px auto 8px;
+        background:
+            radial-gradient(closest-side, #ffffff 72%, transparent 73% 100%),
+            conic-gradient(var(--accent-color) calc(var(--value, 0) * 1%), rgba(16, 42, 67, 0.12) 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .speedometer-value {
+        font-size: 1.35rem;
+        font-weight: 650;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+{% endblock %}
+
 {% block page_header %}
 <div class="page-header">
     <div class="page-title">
@@ -9,7 +39,7 @@
         <span class="page-pill">Country overview</span>
     </div>
     <div class="page-subtitle">
-        Latest electricity generation, low‑carbon share and fuel mix for {{ country.name }}.
+        Latest primary energy supply,electricity generation, low‑carbon share and fuel mix for {{ country.name }}.
     </div>
 </div>
 {% endblock %}
@@ -22,6 +52,57 @@
         <span class="breadcrumbs-separator">/</span>
         <span class="breadcrumbs-current">{{ country.name }}</span>
     </nav>
+
+    <h2 class="section-title">Primary Energy Supply</h2>
+    <p class="primary-energy-intro">
+        Primary energy supply represents all energy available for use in a country:
+        domestic production plus imports minus exports. Values below come from the latest
+        available year in the Energy Institute's
+        <a href="https://www.energyinst.org/statistical-review/about">Statistical Review of World Energy</a>.
+        Note that electricity generation is not considered part of primary energy supply, but it does include the primary
+        energy used for electricity generation.
+    </p>
+    {% if primary_energy_balance %}
+    <div class="dashboard">
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Total Supply</div>
+            <div class="gauge-value">{{ primary_energy_balance.total_supply|floatformat:"0g" }} PJ</div>
+            <div class="gauge-subtext">Calendar year {{ primary_energy_balance.year }}</div>
+            <span class="tooltiptext">Total primary energy supply across coal, oil, gas, nuclear, and renewables.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Low-carbon Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_low_carbon|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_low_carbon|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Share of primary energy supply</div>
+            <span class="tooltiptext">Share of total primary energy supply from nuclear and renewable sources.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Renewable Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_renewable|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_renewable|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Share of primary energy supply</div>
+            <span class="tooltiptext">Share of total primary energy supply from renewable sources.</span>
+        </div>
+
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Electricity Share</div>
+            <div class="speedometer" style="--value: {{ primary_energy_balance.share_electricity|floatformat:2 }};">
+                <div class="speedometer-value">{{ primary_energy_balance.share_electricity|floatformat:1 }}%</div>
+            </div>
+            <div class="gauge-subtext">Electricity output as share of supply</div>
+            <span class="tooltiptext">Total electricity production as a percentage of primary energy supply.</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="summary-box">
+        No primary energy supply data available for this country yet.
+    </div>
+    {% endif %}
 
     <h2 class="section-title">Electricity Generation</h2>
     <div class="dashboard">

@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from .models import (
     Country,
+    CountryEnergyBalanceYear,
     CountryFuel,
     CountryFuelYear,
     Fuel,
@@ -36,6 +37,9 @@ def fuel_index(request):
 
 def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
+    primary_energy_balance = (
+        CountryEnergyBalanceYear.objects.filter(country=country).order_by("-year").first()
+    )
 
     yoy_growth_pct = _growth_rate(
         country.generation_latest_12_months,
@@ -102,6 +106,7 @@ def country_detail(request, code):
 
     context = {
         "country": country,
+        "primary_energy_balance": primary_energy_balance,
         "country_fuels": ordered_country_fuels,
         "yoy_growth_pct": yoy_growth_pct,
         "start_date": start_date,
