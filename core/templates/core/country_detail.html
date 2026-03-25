@@ -23,11 +23,13 @@
         <span class="breadcrumbs-current">{{ country.name }}</span>
     </nav>
 
+    <h2 class="section-title">Electricity Generation</h2>
     <div class="dashboard">
         <!-- Rank -->
         <div class="gauge-card tooltip">
             <div class="gauge-label">Global Rank</div>
             <div class="gauge-value">#{{ country.electricity_rank }}</div>
+            <div class="gauge-subtext">Electricity generation over last 12 months</div>
             <span class="tooltiptext">This country's rank as an electricity producer globally.</span>
         </div>
 
@@ -45,6 +47,7 @@
         <div class="gauge-card tooltip">
             <div class="gauge-label">Low‑carbon Share</div>
             <div class="gauge-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+            <div class="gauge-subtext">Share of electricity from non-fossil sources</div>
             <span class="tooltiptext">Percentage of this country's electricity supplied by low‑carbon sources.</span>
         </div>
 
