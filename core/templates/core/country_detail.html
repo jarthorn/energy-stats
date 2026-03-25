@@ -98,6 +98,13 @@
             <span class="tooltiptext">Total electricity production as a percentage of primary energy supply.</span>
         </div>
     </div>
+
+    {% if primary_energy_supply_donut_html %}
+    <div class="graph-container">
+        <div class="graph-title">Primary energy supply for {{ country.name }} ({{ primary_energy_balance.year }})</div>
+        {{ primary_energy_supply_donut_html|safe }}
+    </div>
+    {% endif %}
     {% else %}
     <div class="summary-box">
         No primary energy supply data available for this country yet.

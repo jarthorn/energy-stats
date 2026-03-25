@@ -37,14 +37,41 @@ def fuel_index(request):
 
 def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
-    primary_energy_balance = (
-        CountryEnergyBalanceYear.objects.filter(country=country).order_by("-year").first()
-    )
+    primary_energy_balance = CountryEnergyBalanceYear.objects.filter(country=country).order_by("-year").first()
+    primary_energy_supply_donut_html = None
+    if primary_energy_balance and primary_energy_balance.total_supply > 0:
+        values = [
+            primary_energy_balance.coal_supply,
+            primary_energy_balance.oil_supply,
+            primary_energy_balance.gas_supply,
+            primary_energy_balance.nuclear_supply,
+            primary_energy_balance.renewable_supply,
+        ]
+        labels = ["Coal", "Oil", "Gas", "Nuclear", "Renewables"]
+        colors = ["#34495e", "#e67e22", "#2980b9", "#8e44ad", "#2ecc71"]
 
-    yoy_growth_pct = _growth_rate(
-        country.generation_latest_12_months,
-        country.generation_previous_12_months
-    )
+        fig = go.Figure(
+            data=[
+                go.Pie(
+                    labels=labels,
+                    values=values,
+                    hole=0.55,
+                    sort=False,
+                    marker=dict(colors=colors),
+                    hovertemplate="%{label}<br>%{value} PJ<br>%{percent} of supply<extra></extra>",
+                    showlegend=True,
+                )
+            ]
+        )
+        fig.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=20, r=20, t=20, b=20),
+            legend=dict(orientation="h", yanchor="middle", y=-0.1, xanchor="center", x=0.5),
+        )
+        primary_energy_supply_donut_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+    yoy_growth_pct = _growth_rate(country.generation_latest_12_months, country.generation_previous_12_months)
 
     start_date = None
     if country.latest_month:
@@ -59,7 +86,7 @@ def country_detail(request, code):
 
     largest_source = None
     if country_fuels.exists():
-        largest_source = country_fuels.order_by('-generation_latest_12_months').first()
+        largest_source = country_fuels.order_by("-generation_latest_12_months").first()
 
     fastest_growing_source = None
     max_growth = float('-inf')
@@ -107,6 +134,7 @@ def country_detail(request, code):
     context = {
         "country": country,
         "primary_energy_balance": primary_energy_balance,
+        "primary_energy_supply_donut_html": primary_energy_supply_donut_html,
         "country_fuels": ordered_country_fuels,
         "yoy_growth_pct": yoy_growth_pct,
         "start_date": start_date,
@@ -153,9 +181,7 @@ def country_fuel_detail(request, code, fuel_type):
         )
 
         # Set y-axes titles
-        fig.update_yaxes(
-            title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor="lightgray"
-        )
+        fig.update_yaxes(title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor="lightgray")
         fig.update_yaxes(title_text="<b>Share</b> (%)", secondary_y=True, showgrid=False)
         fig.update_xaxes(type="category", showgrid=False)  # Ensure years aren't displayed as floats
 
@@ -231,11 +257,11 @@ def country_fuel_detail(request, code, fuel_type):
             monthly_graph_html = fig_monthly.to_html(full_html=False, include_plotlyjs=False)
 
     context = {
-        'country': country,
-        'country_fuel': country_fuel,
-        'fuel': country_fuel.fuel,
-        'graph_html': graph_html,
-        'monthly_graph_html': monthly_graph_html,
+        "country": country,
+        "country_fuel": country_fuel,
+        "fuel": country_fuel.fuel,
+        "graph_html": graph_html,
+        "monthly_graph_html": monthly_graph_html,
     }
     return render(request, 'core/country_fuel_detail.html', context)
 
