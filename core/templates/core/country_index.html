@@ -2,6 +2,12 @@
 
 {% block title %}Energy Stats - Countries{% endblock %}
 
+{% block extra_styles %}
+    .section-divider-left {
+        border-left: 2px solid #c7cfde;
+    }
+{% endblock %}
+
 {% block page_header %}
 <div class="page-header">
     <div class="page-title">
@@ -24,23 +30,26 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Country</th>
-                <th>Latest Month</th>
-                <th>Latest 12 Months (TWh)</th>
-                <th>Previous 12 Months (TWh)</th>
+                <th rowspan="2">Country</th>
+                <th class="section-divider-left" colspan="4">Electricity Generation (Latest 12 Months)</th>
+                <th class="section-divider-left" colspan="3">Primary Energy Supply (Annual)</th>
+            </tr>
+            <tr>
+                <th class="section-divider-left">Latest Month</th>
+                <th>Generation (TWh)</th>
                 <th>YoY Growth</th>
-                <th>Low‑carbon share</th>
+                <th>Low‑carbon</th>
+                <th class="section-divider-left">Supply (PJ)</th>
+                <th>Low‑carbon</th>
+                <th>Electrification</th>
             </tr>
         </thead>
         <tbody>
             {% for country in countries %}
             <tr onclick="window.location.href='{% url 'country_detail' country.code %}';" style="cursor: pointer;">
-                <td>{{ country.electricity_rank }}</td>
                 <td class="primary-col">{{ country.name }}</td>
-                <td>{{ country.latest_month|date:"M Y" }}</td>
+                <td class="section-divider-left">{{ country.latest_month|date:"M Y" }}</td>
                 <td class="num-col">{{ country.generation_latest_12_months|floatformat:"2g" }}</td>
-                <td class="num-col">{{ country.generation_previous_12_months|floatformat:"2g" }}</td>
                 <td>
                     {% if country.yoy_growth_pct is not None %}
                     <span
@@ -54,6 +63,27 @@
                 <td class="num-col">
                     {% if country.low_carbon_pct is not None %}
                     {{ country.low_carbon_pct|floatformat:1 }}%
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td class="num-col section-divider-left">
+                    {% if country.pes_supply_pj is not None %}
+                    {{ country.pes_supply_pj|floatformat:"0g" }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td class="num-col">
+                    {% if country.pes_low_carbon_pct is not None %}
+                    {{ country.pes_low_carbon_pct|floatformat:1 }}%
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td class="num-col">
+                    {% if country.pes_electrification_pct is not None %}
+                    {{ country.pes_electrification_pct|floatformat:1 }}%
                     {% else %}
                     N/A
                     {% endif %}

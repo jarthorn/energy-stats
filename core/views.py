@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
+from django.db.models import OuterRef, Subquery
 from .models import (
     Country,
     CountryEnergyBalanceYear,
@@ -21,7 +22,17 @@ def index(request):
     return render(request, 'core/index.html')
 
 def country_index(request):
-    countries = list(Country.objects.order_by('electricity_rank'))
+    latest_energy_balance = CountryEnergyBalanceYear.objects.filter(country=OuterRef("pk")).order_by(
+        "-year"
+    )
+
+    countries = list(
+        Country.objects.order_by("electricity_rank").annotate(
+            pes_supply_pj=Subquery(latest_energy_balance.values("total_supply")[:1]),
+            pes_low_carbon_pct=Subquery(latest_energy_balance.values("share_low_carbon")[:1]),
+            pes_electrification_pct=Subquery(latest_energy_balance.values("share_electricity")[:1]),
+        )
+    )
 
     for country in countries:
         country.yoy_growth_pct = _growth_rate(
