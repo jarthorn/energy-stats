@@ -39,6 +39,15 @@ def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
     primary_energy_balance = CountryEnergyBalanceYear.objects.filter(country=country).order_by("-year").first()
     primary_energy_supply_donut_html = None
+    primary_energy_supply_area_html = None
+    energy_supply_colors = {
+        "Coal": "#5a6a76",
+        "Oil": "#ee9847",
+        "Gas": "#4c94ca",
+        "Nuclear": "#a261c4",
+        "Renewables": "#5ad794",
+    }
+
     if primary_energy_balance and primary_energy_balance.total_supply > 0:
         values = [
             primary_energy_balance.coal_supply,
@@ -48,7 +57,7 @@ def country_detail(request, code):
             primary_energy_balance.renewable_supply,
         ]
         labels = ["Coal", "Oil", "Gas", "Nuclear", "Renewables"]
-        colors = ["#34495e", "#e67e22", "#2980b9", "#8e44ad", "#2ecc71"]
+        colors = [energy_supply_colors[label] for label in labels]
 
         fig = go.Figure(
             data=[
@@ -70,6 +79,118 @@ def country_detail(request, code):
             legend=dict(orientation="h", yanchor="middle", y=-0.1, xanchor="center", x=0.5),
         )
         primary_energy_supply_donut_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+    # Stacked area chart: energy supply mix (%) over time
+    balance_years = list(
+        CountryEnergyBalanceYear.objects.filter(country=country).order_by("year")
+    )
+    if balance_years:
+        years = []
+        coal_pct = []
+        oil_pct = []
+        gas_pct = []
+        nuclear_pct = []
+        renewable_pct = []
+
+        for row in balance_years:
+            denom = (
+                (row.coal_supply or 0)
+                + (row.oil_supply or 0)
+                + (row.gas_supply or 0)
+                + (row.nuclear_supply or 0)
+                + (row.renewable_supply or 0)
+            )
+            if denom <= 0:
+                continue
+            years.append(row.year)
+            coal_pct.append((row.coal_supply / denom) * 100)
+            oil_pct.append((row.oil_supply / denom) * 100)
+            gas_pct.append((row.gas_supply / denom) * 100)
+            nuclear_pct.append((row.nuclear_supply / denom) * 100)
+            renewable_pct.append((row.renewable_supply / denom) * 100)
+
+        if years:
+            fig_area = go.Figure()
+            fig_area.add_trace(
+                go.Scatter(
+                    x=years,
+                    y=coal_pct,
+                    mode="lines",
+                    name="Coal",
+                    stackgroup="one",
+                    line=dict(width=0.5, color=energy_supply_colors["Coal"]),
+                    fillcolor=energy_supply_colors["Coal"],
+                    hovertemplate="Coal<br>%{x}: %{y:.1f}%<extra></extra>",
+                )
+            )
+            fig_area.add_trace(
+                go.Scatter(
+                    x=years,
+                    y=oil_pct,
+                    mode="lines",
+                    name="Oil",
+                    stackgroup="one",
+                    line=dict(width=0.5, color=energy_supply_colors["Oil"]),
+                    fillcolor=energy_supply_colors["Oil"],
+                    hovertemplate="Oil<br>%{x}: %{y:.1f}%<extra></extra>",
+                )
+            )
+            fig_area.add_trace(
+                go.Scatter(
+                    x=years,
+                    y=gas_pct,
+                    mode="lines",
+                    name="Gas",
+                    stackgroup="one",
+                    line=dict(width=0.5, color=energy_supply_colors["Gas"]),
+                    fillcolor=energy_supply_colors["Gas"],
+                    hovertemplate="Gas<br>%{x}: %{y:.1f}%<extra></extra>",
+                )
+            )
+            fig_area.add_trace(
+                go.Scatter(
+                    x=years,
+                    y=nuclear_pct,
+                    mode="lines",
+                    name="Nuclear",
+                    stackgroup="one",
+                    line=dict(width=0.5, color=energy_supply_colors["Nuclear"]),
+                    fillcolor=energy_supply_colors["Nuclear"],
+                    hovertemplate="Nuclear<br>%{x}: %{y:.1f}%<extra></extra>",
+                )
+            )
+            fig_area.add_trace(
+                go.Scatter(
+                    x=years,
+                    y=renewable_pct,
+                    mode="lines",
+                    name="Renewables",
+                    stackgroup="one",
+                    line=dict(width=0.5, color=energy_supply_colors["Renewables"]),
+                    fillcolor=energy_supply_colors["Renewables"],
+                    hovertemplate="Renewables<br>%{x}: %{y:.1f}%<extra></extra>",
+                )
+            )
+
+            fig_area.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=40, r=20, t=10, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+            )
+            fig_area.update_yaxes(
+                title_text="<b>Share of supply</b> (%)",
+                range=[0, 100],
+                ticksuffix="%",
+                showgrid=True,
+                gridcolor="lightgray",
+            )
+            fig_area.update_xaxes(type="category", showgrid=False, title_text="<b>Year</b>")
+
+            include_js = "cdn" if not primary_energy_supply_donut_html else False
+            primary_energy_supply_area_html = fig_area.to_html(
+                full_html=False, include_plotlyjs=include_js
+            )
 
     yoy_growth_pct = _growth_rate(country.generation_latest_12_months, country.generation_previous_12_months)
 
@@ -135,6 +256,7 @@ def country_detail(request, code):
         "country": country,
         "primary_energy_balance": primary_energy_balance,
         "primary_energy_supply_donut_html": primary_energy_supply_donut_html,
+        "primary_energy_supply_area_html": primary_energy_supply_area_html,
         "country_fuels": ordered_country_fuels,
         "yoy_growth_pct": yoy_growth_pct,
         "start_date": start_date,

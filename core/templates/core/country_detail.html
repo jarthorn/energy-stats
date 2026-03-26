@@ -256,6 +256,13 @@
         {{ primary_energy_supply_donut_html|safe }}
     </div>
     {% endif %}
+
+    {% if primary_energy_supply_area_html %}
+    <div class="graph-container">
+        <div class="graph-title">Primary energy supply mix over time for {{ country.name }}</div>
+        {{ primary_energy_supply_area_html|safe }}
+    </div>
+    {% endif %}
     {% else %}
     <div class="summary-box">
         No primary energy supply data available for this country yet.
