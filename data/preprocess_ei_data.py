@@ -131,8 +131,9 @@ COLUMNS_TO_KEEP = [
     "hydro_ej",
     "solar_ej",
     "wind_ej",
-    "tes_ej",
-    "elect_twh",
+    "electbyfuel_coal",
+    "electbyfuel_gas",
+    "electbyfuel_oil",
 ]
 
 MIN_YEAR = 2000

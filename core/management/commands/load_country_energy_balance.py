@@ -45,14 +45,30 @@ REQUIRED_COLUMNS = (
     "gascons_ej",
     "oilcons_ej",
     "nuclear_ej",
-    "electricity_ej",
     *RENEWABLE_EJ_COLUMNS,
+    "electbyfuel_coal",
+    "electbyfuel_gas",
+    "electbyfuel_oil",
 )
 
 
 def _ej_to_pj_int(value: str) -> int:
     """Parse an EJ string from the CSV and return integer PJ (1 EJ = 1000 PJ)."""
     return int(round(float(value) * 1000))
+
+
+def _twh_to_pj_int(value: str) -> int:
+    """
+    Use conversion factor of 1 kWh = 3600 kJ (1 TWh = 3.6 PJ) used by the Energy Institute.
+    To calculate total energy, we need to account for the thermal efficiency of the power plant.
+    While the Energy Institute methodology states that they use a sliding thermal efficiency rating, their
+    data indicates that they use a fixed thermal efficiency rating of 33%.
+    For example, for Canada in 2024 the EI Statistical Review of World Energy provides:
+         electbyfuel_nuclear = 85.46766891.
+         nuclear_ej = 0.93237457 (which is 932.37457 PJ)
+         85.46766891 * 3.6 / 0.33 = 932.37.45699
+    """
+    return int(round(float(value) * 3.6 / 0.33))
 
 
 def _parse_ej_float(value: str) -> float:
@@ -113,7 +129,15 @@ class Command(BaseCommand):
                 renewable_pj = int(round(renewable_ej * 1000))
                 total_pj = coal_pj + oil_pj + gas_pj + nuclear_pj + renewable_pj
 
-                electricity_pj = _ej_to_pj_int(row["electricity_ej"])
+                # To calculate electricity share, we need to include the energy used by fossil fuels for electricity
+                # generation and we assume that all renewable and nuclear energy is used for electricity generation.
+                electricity_pj = (
+                    _twh_to_pj_int(row["electbyfuel_coal"]) +
+                    _twh_to_pj_int(row["electbyfuel_gas"]) +
+                    _twh_to_pj_int(row["electbyfuel_oil"]) +
+                    nuclear_pj +
+                    renewable_pj
+                )
 
                 if total_pj > 0:
                     share_low_carbon = (nuclear_pj + renewable_pj) / total_pj * 100
