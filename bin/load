@@ -3,3 +3,4 @@
 uv run manage.py extract_ember --start-date 2025-01
 uv run manage.py transform_and_load
 uv run manage.py load_monthly_records
+uv run manage.py load_country_energy_balance
