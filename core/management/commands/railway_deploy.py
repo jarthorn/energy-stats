@@ -16,9 +16,6 @@ class Command(BaseCommand):
     help = "Run deployment hooks for Railway."
 
     def handle(self, *args, **options):
-        self.stdout.write("Running migrations...")
-        call_command("migrate", interactive=False)
-
         self.stdout.write("Running collectstatic...")
         call_command("collectstatic", "--noinput")
 

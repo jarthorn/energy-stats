@@ -3,7 +3,7 @@ Management command: railway_etl_pipeline
 
 Thin wrapper intended for Railway one-off jobs.
 
-Runs database migrations and then executes the full ETL/backfill pipeline for production.
+Runs the full ETL/backfill pipeline for production.
 This will backfill the entire database from upstream sources.
 """
 
@@ -25,9 +25,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         start_date: str = options["start_date"]
-
-        self.stdout.write("Running migrations...")
-        call_command("migrate", interactive=False)
 
         self.stdout.write("Running ETL pipeline...")
         call_command("extract_ember", start_date=start_date)
