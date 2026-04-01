@@ -55,22 +55,19 @@
 
 
     <h2 class="section-title">Electricity Generation</h2>
+    <div class="section-description">
+        Electricity generation in {{ country.name }} from {{ start_date|date:"F Y" }} to {{ country.latest_month|date:"F Y" }}.
+    </div>
     <div class="dashboard">
-        <!-- Rank -->
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">Global Rank</div>
-            <div class="gauge-value">#{{ country.electricity_rank }}</div>
-            <div class="gauge-subtext">Electricity generation over last 12 months</div>
-            <span class="tooltiptext">This country's rank as an electricity producer globally.</span>
-        </div>
 
         <!-- Generation -->
         <div class="gauge-card tooltip">
             <div class="gauge-label">Total Generation</div>
             <div class="gauge-value">{{ country.generation_latest_12_months|floatformat:"0g" }} TWh</div>
-            {% if start_date and country.latest_month %}
-            <div class="gauge-subtext">{{ start_date|date:"M Y" }} - {{ country.latest_month|date:"M Y" }}</div>
-            {% endif %}
+            <div 
+                class="gauge-subtext {% if yoy_growth_pct > 0 %}positive{% elif yoy_growth_pct < 0 %}negative{% endif %}">
+                {% if yoy_growth_pct > 0 %}+{% endif %}{{ yoy_growth_pct|floatformat:1 }}% YoY
+            </div>
             <span class="tooltiptext">Sum of electricity generation in the most recent 12 months.</span>
         </div>
 
@@ -86,16 +83,6 @@
             {% endif %}
             <div class="gauge-subtext">Electricity from non-fossil sources</div>
             <span class="tooltiptext">Percentage of this country's electricity supplied by low‑carbon sources.</span>
-        </div>
-
-        <!-- YoY Growth -->
-        <div class="gauge-card tooltip">
-            <div class="gauge-label">YoY Growth</div>
-            <div
-                class="gauge-value {% if yoy_growth_pct > 0 %}positive{% elif yoy_growth_pct < 0 %}negative{% endif %}">
-                {% if yoy_growth_pct > 0 %}+{% endif %}{{ yoy_growth_pct|floatformat:2 }}%
-            </div>
-            <span class="tooltiptext">Year‑over‑year growth rate compared to the previous 12‑month period.</span>
         </div>
 
         <!-- Largest Source -->
@@ -140,6 +127,11 @@
             <div
                 class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
                 {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}% YoY
+            </div>
+            {% endif %}
+            {% if fastest_growing_source %}
+            <div class="gauge-subtext">
+                {{ fastest_growing_source.generation_latest_12_months|floatformat:"1g" }} TWh
             </div>
             {% endif %}
             <span class="tooltiptext">The power source with the highest year‑over‑year growth rate over the past 12 months.</span>
