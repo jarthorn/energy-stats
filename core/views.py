@@ -49,6 +49,7 @@ def fuel_index(request):
 def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
     primary_energy_balance = CountryEnergyBalanceYear.objects.filter(country=country).order_by("-year").first()
+    primary_energy_balance_yoy_growth_pct = None
     primary_energy_supply_donut_html = None
     primary_energy_supply_area_html = None
     energy_supply_colors = {
@@ -58,6 +59,22 @@ def country_detail(request, code):
         "Nuclear": "#a261c4",
         "Renewables": "#5ad794",
     }
+
+    if primary_energy_balance:
+        previous_primary_energy_balance = CountryEnergyBalanceYear.objects.filter(
+            country=country,
+            year=primary_energy_balance.year - 1,
+        ).first()
+        if (
+            previous_primary_energy_balance
+            and previous_primary_energy_balance.total_supply is not None
+            and previous_primary_energy_balance.total_supply > 0
+            and primary_energy_balance.total_supply is not None
+        ):
+            primary_energy_balance_yoy_growth_pct = _growth_rate(
+                primary_energy_balance.total_supply,
+                previous_primary_energy_balance.total_supply,
+            )
 
     if primary_energy_balance and primary_energy_balance.total_supply > 0:
         values = [
@@ -266,6 +283,7 @@ def country_detail(request, code):
     context = {
         "country": country,
         "primary_energy_balance": primary_energy_balance,
+        "primary_energy_balance_yoy_growth_pct": primary_energy_balance_yoy_growth_pct,
         "primary_energy_supply_donut_html": primary_energy_supply_donut_html,
         "primary_energy_supply_area_html": primary_energy_supply_area_html,
         "country_fuels": ordered_country_fuels,

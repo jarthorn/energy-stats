@@ -211,6 +211,12 @@
             <div class="gauge-label">Total Supply</div>
             <div class="gauge-value">{{ primary_energy_balance.total_supply|floatformat:"0g" }} PJ</div>
             <div class="gauge-subtext">Calendar year {{ primary_energy_balance.year }}</div>
+            {% if primary_energy_balance_yoy_growth_pct is not None %}
+            <div
+                class="gauge-subtext {% if primary_energy_balance_yoy_growth_pct > 0 %}positive{% elif primary_energy_balance_yoy_growth_pct < 0 %}negative{% endif %}">
+                {% if primary_energy_balance_yoy_growth_pct > 0 %}+{% endif %}{{ primary_energy_balance_yoy_growth_pct|floatformat:1 }}% YoY
+            </div>
+            {% endif %}
             <span class="tooltiptext">Total primary energy supply across coal, oil, gas, nuclear, and renewables.</span>
         </div>
 
