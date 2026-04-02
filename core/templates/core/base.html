@@ -60,11 +60,15 @@
             padding: 0 20px;
         }
 
+        .page-container {
+            width: 100%;
+        }
+
         .header-inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 0;
+            padding: 14px;
         }
 
         .logo {
@@ -622,6 +626,11 @@
             .page-shell {
                 padding: 18px 0 26px;
             }
+
+            .page-container {
+                padding-left: 0;
+                padding-right: 0;
+            }
         }
 
         {% block extra_styles %}{% endblock %}
@@ -644,7 +653,7 @@
     </header>
 
     <div class="page-shell">
-        <div class="container">
+        <div class="container page-container">
             <div class="page-surface">
                 {% block page_header %}{% endblock %}
                 <div class="page-main">
