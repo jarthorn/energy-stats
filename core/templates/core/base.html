@@ -612,6 +612,8 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 6px;
+                padding-left: 16px;
+                padding-right: 16px;
             }
 
             .main-nav {
@@ -630,6 +632,18 @@
             .page-container {
                 padding-left: 0;
                 padding-right: 0;
+            }
+
+            .data-table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .data-table th,
+            .data-table td {
+                white-space: nowrap;
             }
         }
 
