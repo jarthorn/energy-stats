@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+
+{% block title %}Energy Stats - About{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        About
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">About</span>
+    </nav>
+
+    <p>
+        Energy Stats is a browseable website for exploring electricity-grid and energy-transition data by country.
+        It uses high-quality public datasets, but it should <strong>not</strong> be treated as an authoritative reference:
+        figures can be revised by the underlying publishers, methods differ by source, and any summaries here are for
+        exploration rather than formal reporting.
+    </p>
+
+    <h2 id="data-sources" class="section-title">
+        Data sources
+        <a href="#data-sources" class="anchor-link">#</a>
+    </h2>
+    <p>
+        This project draws from multiple organizations. Because methodologies can differ, the site avoids directly combining
+        or comparing metrics from different sources as if they were identical.
+    </p>
+
+    <ul>
+        <li>
+            <strong>Energy Institute (EI) — Statistical Review of World Energy</strong>:
+            primary energy supply and related energy-system totals.
+            (<a href="https://www.energyinst.org/statistical-review" target="_blank" rel="noopener noreferrer">link</a>)
+        </li>
+        <li>
+            <strong>Ember — Monthly Electricity Data</strong>:
+            monthly electricity generation, demand, and emissions time series.
+            (<a href="https://ember-energy.org/data/monthly-electricity-data/" target="_blank" rel="noopener noreferrer">link</a>)
+        </li>
+    </ul>
+
+    <h2 class="section-title">Primary energy: interpretation caveats</h2>
+    <p>
+        “Primary energy” is a useful high-level metric, but it can be easy to misread—especially when comparing fossil fuels
+        (often counted as thermal inputs) with non-fossil electricity (often counted as electrical outputs). This can make
+        low-carbon sources appear smaller in “primary energy” terms than they are in delivered electricity.
+    </p>
+    <p>
+        For a clear explanation of direct vs substituted primary energy (and why the choice matters), see:
+        <a href="https://ourworldindata.org/energy-substitution-method" target="_blank" rel="noopener noreferrer">
+            Our World in Data — What’s the difference between direct and substituted primary energy?
+        </a>
+    </p>
+
+    <h2 class="section-title">Source code</h2>
+    <p>
+        The source code is freely available under the MIT license, and contributions are welcome:
+        <a href="https://github.com/jarthorn/energy-stats" target="_blank" rel="noopener noreferrer">
+            github.com/jarthorn/energy-stats
+        </a>
+    </p>
+{% endblock %}
+

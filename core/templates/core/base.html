@@ -129,6 +129,17 @@
             width: 100%;
         }
 
+        .anchor-link {
+            visibility: hidden;
+            margin-left: 0.5em;
+            text-decoration: none;
+            color: #888;
+        }
+
+        h2:hover .anchor-link {
+            visibility: visible; /* Show when heading is hovered */
+        }
+
         .page-shell {
             padding: 26px 0 40px;
         }
@@ -662,6 +673,7 @@
                 <a href="{% url 'country_index' %}" class="nav-link">Countries</a>
                 <a href="{% url 'fuel_index' %}" class="nav-link">Fuels</a>
                 <a href="{% url 'monthly_generation_records_index' %}" class="nav-link">Records</a>
+                <a href="{% url 'about' %}" class="nav-link">About</a>
             </nav>
         </div>
     </header>

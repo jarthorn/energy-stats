@@ -21,6 +21,9 @@ SCATTER_CHART_COLOR = "#cc2e89"
 def index(request):
     return render(request, 'core/index.html')
 
+def about(request):
+    return render(request, "core/about.html")
+
 def country_index(request):
     latest_energy_balance = CountryEnergyBalanceYear.objects.filter(country=OuterRef("pk")).order_by(
         "-year"
