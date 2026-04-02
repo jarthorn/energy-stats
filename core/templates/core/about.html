@@ -19,8 +19,13 @@
 
     <p>
         Energy Stats is a browseable website for exploring electricity-grid and energy-transition data by country.
-        It uses high-quality public datasets, but it should <strong>not</strong> be treated as an authoritative reference:
-        figures can be revised by the underlying publishers, methods differ by source, and any summaries here are for
+        The goal of this site is to let you see the energy transition as it is happening in concrete data around the world.
+        The world's energy systems are vast, complex, and slow to change. This is a transition that will be measured in
+        years and decades, rather than days and months. However, through this data you can get a glimpse
+        of the massive scale of the energy transition as it is happening around the world.
+
+        While this site uses high-quality public datasets, it should <strong>not</strong> be treated as an authoritative primary reference:
+        Source datasets can be revised by the upstream publishers, methods differ by source, and any summaries here are for
         exploration rather than formal reporting.
     </p>
 
@@ -29,42 +34,64 @@
         <a href="#data-sources" class="anchor-link">#</a>
     </h2>
     <p>
-        This project draws from multiple organizations. Because methodologies can differ, the site avoids directly combining
-        or comparing metrics from different sources as if they were identical.
+        This project draws from data provided by multiple organizations. Because methodologies can differ,
+        the site avoids directly combining or comparing metrics from different sources as if they were identical.
+        In every case, we strive to use the most reputable and up-to-date data available. Our main sources are:
     </p>
 
     <ul>
         <li>
             <strong>Energy Institute (EI) — Statistical Review of World Energy</strong>:
-            primary energy supply and related energy-system totals.
-            (<a href="https://www.energyinst.org/statistical-review" target="_blank" rel="noopener noreferrer">link</a>)
+            Primary energy supply and related energy-system totals.
+            See the source <a href="https://www.energyinst.org/statistical-review/resources-and-data-downloads" target="_blank" rel="noopener noreferrer">dataset</a> and
+            <a href="https://sr25downloads.blob.core.windows.net/production-reports/Methodology.pdf" target="_blank" rel="noopener noreferrer">methodology</a>.
+            Note that while the IEA is the key global source for primary energy data, their restrictive licensing
+            prevents us from using it for this site. The Energy Institute is an independent and well regarded alternative source.
         </li>
         <li>
             <strong>Ember — Monthly Electricity Data</strong>:
-            monthly electricity generation, demand, and emissions time series.
-            (<a href="https://ember-energy.org/data/monthly-electricity-data/" target="_blank" rel="noopener noreferrer">link</a>)
+            Monthly electricity generation, demand, and emissions time series.
+            See the source <a href="https://ember-energy.org/data/monthly-electricity-data/" target="_blank" rel="noopener noreferrer">dataset</a>
+            and <a href="https://ember-energy.org/app/uploads/2024/05/Ember-Electricity-Data-Methodology.pdf" target="_blank" rel="noopener noreferrer">methodology</a>.
         </li>
     </ul>
 
-    <h2 class="section-title">Primary energy: interpretation caveats</h2>
+    <h2 id="primary-energy" class="section-title">
+        Primary energy: interpretation caveats
+        <a href="#primary-energy" class="anchor-link">#</a>
+    </h2>
     <p>
-        “Primary energy” is a useful high-level metric, but it can be easy to misread—especially when comparing fossil fuels
-        (often counted as thermal inputs) with non-fossil electricity (often counted as electrical outputs). This can make
-        low-carbon sources appear smaller in “primary energy” terms than they are in delivered electricity.
+        <strong></strong>Primary energy</strong> is an internationally recognized metric in energy accounting,
+        but it can be easy to misread. This is especially true when comparing fossil fuels (often counted as
+        thermal inputs) with non-fossil electricity (secondary energy, or an energy carrier). Because most of
+        the energy in fossil fuels is wasted during combustion, the amount of energy required to achieve the
+        same task (moving a vehicle, heating a home, etc.) is much higher for fossil fuels than for non-fossil
+        electricity. This can make low-carbon sources appear smaller in “primary energy” terms than the value
+        they deliver to end users. However, it is still a valuable metric for understanding the shift from
+        combustion to electrification in the global energy system.
     </p>
     <p>
-        For a clear explanation of direct vs substituted primary energy (and why the choice matters), see:
+        For an excellent explanation of direct vs substituted primary energy and how to interpret it, see:
         <a href="https://ourworldindata.org/energy-substitution-method" target="_blank" rel="noopener noreferrer">
             Our World in Data — What’s the difference between direct and substituted primary energy?
         </a>
     </p>
 
-    <h2 class="section-title">Source code</h2>
+    <h2 id="source-code" class="section-title">
+        Source code and contact information
+        <a href="#source-code" class="anchor-link">#</a>
+    </h2>
     <p>
-        The source code is freely available under the MIT license, and contributions are welcome:
-        <a href="https://github.com/jarthorn/energy-stats" target="_blank" rel="noopener noreferrer">
-            github.com/jarthorn/energy-stats
-        </a>
+        The <a href="https://github.com/jarthorn/energy-stats" target="_blank" rel="noopener noreferrer">source code</a>
+        for this site is freely available under the MIT license, and contributions are welcome.
+        You are also welcome to open <a href="https://github.com/jarthorn/energy-stats/issues">issues in GitHub</a>
+        if you find a bug in either the code or the data.
+    </p>
+    <p>
+        Highlights of monthly electricity records and other insights are shared occasionally on the site's
+        social media accounts. You are welcome to follow or interact with us on
+        <a href="https://bsky.app/profile/energyrecords.bsky.social">Bluesky</a>,
+        or <a href="https://x.com/energyrecord5">the site formerly known as Twitter</a>.
     </p>
 {% endblock %}
 
