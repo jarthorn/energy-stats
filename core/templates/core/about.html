@@ -50,9 +50,13 @@
         </li>
         <li>
             <strong>Ember — Monthly Electricity Data</strong>:
-            Monthly electricity generation, demand, and emissions time series.
+            Monthly electricity generation data for 88 countries.
             See the source <a href="https://ember-energy.org/data/monthly-electricity-data/" target="_blank" rel="noopener noreferrer">dataset</a>
             and <a href="https://ember-energy.org/app/uploads/2024/05/Ember-Electricity-Data-Methodology.pdf" target="_blank" rel="noopener noreferrer">methodology</a>.
+            Note that data series from Ember for each country start at different years, and are updated
+            on different cadences. In most cases, we use rolling 12-month data windows so that the most recent data are included, while avoiding
+            the skewing effect of seasonal fluctuations. Also noteworthy, data from China starts in 2015, and data from India starts in 2019.
+            These countries are large enough that global-level statistics can be skewed when viewed year over year over those time periods.
         </li>
     </ul>
 
