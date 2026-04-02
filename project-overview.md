@@ -9,8 +9,8 @@ A secondary objective is enabling the author to learn more about Python and Djan
 - Python 3.14
 - uv for environment management. Always use uv to run python.
 - Django 6.0.2.
-- SQLite
-- Ruff for python formatting. Please run ruff check and ruff format before committing.
+- SQLite (local) / Postgres (production)
+- Ruff for python formatting. Please run ruff check and ruff format on all changes.
 
 # Data sources
 
