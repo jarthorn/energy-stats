@@ -21,16 +21,18 @@ class CountryFuelTransformTests(TestCase):
                 # We'll set generation to 1 per month for 2023 and 10.0 for 2024
                 gen = month if year == 2023 else 10.0
 
-                records.append(MonthlyGenerationData(
-                    country=self.country_name,
-                    country_code=self.country_code,
-                    date=date(year, month, 1),
-                    fuel_type=self.fuel_type,
-                    is_aggregate_entity=False,
-                    is_aggregate_series=False,
-                    generation_twh=gen,
-                    share_of_generation_pct=70.0
-                ))
+                records.append(
+                    MonthlyGenerationData(
+                        country=self.country_name,
+                        country_code=self.country_code,
+                        date=date(year, month, 1),
+                        fuel_type=self.fuel_type,
+                        is_aggregate_entity=False,
+                        is_aggregate_series=False,
+                        generation_twh=gen,
+                        share_of_generation_pct=70.0,
+                    )
+                )
 
         MonthlyGenerationData.objects.bulk_create(records)
 
@@ -40,17 +42,14 @@ class CountryFuelTransformTests(TestCase):
         from the staging data.
         """
         # Run the ETL command
-        call_command('transform_and_load', country=[self.country_code])
+        call_command("transform_and_load", country=[self.country_code])
 
         # Check that Country and Fuel objects were created/updated
         self.assertTrue(Country.objects.filter(code=self.country_code).exists())
         self.assertTrue(Fuel.objects.filter(type=self.fuel_type).exists())
 
         # Verify CountryFuel stats
-        cf = CountryFuel.objects.get(
-            country__code=self.country_code,
-            fuel__type=self.fuel_type
-        )
+        cf = CountryFuel.objects.get(country__code=self.country_code, fuel__type=self.fuel_type)
 
         # Latest 12 months (2024): 12 months * 10.0 = 120.0
         # Previous 12 months (2023): Sum(1-12) = 78.0
@@ -70,11 +69,8 @@ class CountryFuelTransformTests(TestCase):
     def test_country_fuel_pair_is_unique(self):
         """The transform_and_load command stays idempotent and unique constraints hold."""
         # Running it twice should not create duplicate CountryFuel records
-        call_command('transform_and_load', country=[self.country_code])
-        call_command('transform_and_load', country=[self.country_code])
+        call_command("transform_and_load", country=[self.country_code])
+        call_command("transform_and_load", country=[self.country_code])
 
-        count = CountryFuel.objects.filter(
-            country__code=self.country_code,
-            fuel__type=self.fuel_type
-        ).count()
+        count = CountryFuel.objects.filter(country__code=self.country_code, fuel__type=self.fuel_type).count()
         self.assertEqual(count, 1)

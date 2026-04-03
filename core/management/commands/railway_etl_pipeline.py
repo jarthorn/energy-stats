@@ -17,11 +17,7 @@ class Command(BaseCommand):
     help = "Run migrations and the full ETL/backfill pipeline for Production (thin wrapper)."
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--start-date",
-            default="2025-01",
-            help="Start date used for data backfills (YYYY-MM)."
-        )
+        parser.add_argument("--start-date", default="2025-01", help="Start date used for data backfills (YYYY-MM).")
 
     def handle(self, *args, **options):
         start_date: str = options["start_date"]
@@ -33,4 +29,3 @@ class Command(BaseCommand):
         call_command("load_country_energy_balance")
 
         self.stdout.write(self.style.SUCCESS("Production ETL pipeline complete."))
-

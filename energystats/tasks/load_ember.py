@@ -28,10 +28,7 @@ class EmberApiClient:
         load_dotenv()
         self.api_key = os.getenv("EMBER_API_KEY")
         if not self.api_key:
-            raise ValueError(
-                "EMBER_API_KEY environment variable is not set. "
-                "Add it to your .env file."
-            )
+            raise ValueError("EMBER_API_KEY environment variable is not set. Add it to your .env file.")
         self.start_date = start_date
 
     def fetch_country(

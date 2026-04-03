@@ -132,11 +132,11 @@ class Command(BaseCommand):
                 # To calculate electricity share, we need to include the energy used by fossil fuels for electricity
                 # generation and we assume that all renewable and nuclear energy is used for electricity generation.
                 electricity_pj = (
-                    _twh_to_pj_int(row["electbyfuel_coal"]) +
-                    _twh_to_pj_int(row["electbyfuel_gas"]) +
-                    _twh_to_pj_int(row["electbyfuel_oil"]) +
-                    nuclear_pj +
-                    renewable_pj
+                    _twh_to_pj_int(row["electbyfuel_coal"])
+                    + _twh_to_pj_int(row["electbyfuel_gas"])
+                    + _twh_to_pj_int(row["electbyfuel_oil"])
+                    + nuclear_pj
+                    + renewable_pj
                 )
 
                 if total_pj > 0:
@@ -177,8 +177,7 @@ class Command(BaseCommand):
         if missing_db_codes:
             self.stderr.write(
                 self.style.WARNING(
-                    "No Country row in database for ISO3 code(s): "
-                    + ", ".join(sorted(missing_db_codes))
+                    "No Country row in database for ISO3 code(s): " + ", ".join(sorted(missing_db_codes))
                 )
             )
 

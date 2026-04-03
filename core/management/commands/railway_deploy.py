@@ -20,4 +20,3 @@ class Command(BaseCommand):
         call_command("collectstatic", "--noinput")
 
         self.stdout.write(self.style.SUCCESS("Railway deployment complete."))
-

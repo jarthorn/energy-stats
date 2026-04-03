@@ -4,20 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0007_country_low_carbon_pct'),
+        ("core", "0007_country_low_carbon_pct"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='countryfuel',
-            name='annual_yoy_growth',
-            field=models.FloatField(blank=True, help_text='Growth rate between the latest 12 months and the previous 12 months (%)', null=True),
+            model_name="countryfuel",
+            name="annual_yoy_growth",
+            field=models.FloatField(
+                blank=True,
+                help_text="Growth rate between the latest 12 months and the previous 12 months (%)",
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='countryfuel',
-            name='month_yoy_growth',
-            field=models.FloatField(blank=True, help_text='Growth rate between the latest month, and the same month in the previous year (%)', null=True),
+            model_name="countryfuel",
+            name="month_yoy_growth",
+            field=models.FloatField(
+                blank=True,
+                help_text="Growth rate between the latest month, and the same month in the previous year (%)",
+                null=True,
+            ),
         ),
     ]

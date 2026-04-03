@@ -2,7 +2,6 @@ import csv
 import sys
 
 
-
 # Hard-coded lists for filtering. Feel free to modify these.
 ALLOWED_COUNTRIES = {
     "Argentina",
@@ -138,6 +137,7 @@ COLUMNS_TO_KEEP = [
 
 MIN_YEAR = 2000
 
+
 def process_csv(input_filepath, output_filepath):
     """
     Processes a CSV representation of the Energy Institute's Statistical Review of World Energy dataset.
@@ -148,11 +148,12 @@ def process_csv(input_filepath, output_filepath):
     - Omit columns that we don't need
     - Omit all year rows before MIN_YEAR
     """
-    with open(input_filepath, 'r', newline='', encoding='utf-8-sig') as infile, \
-         open(output_filepath, 'w', newline='', encoding='utf-8') as outfile:
-
+    with (
+        open(input_filepath, "r", newline="", encoding="utf-8-sig") as infile,
+        open(output_filepath, "w", newline="", encoding="utf-8") as outfile,
+    ):
         reader = csv.reader(infile)
-        writer = csv.writer(outfile, lineterminator='\n')
+        writer = csv.writer(outfile, lineterminator="\n")
 
         # Read the header line
         header = next(reader, None)
@@ -193,11 +194,12 @@ def process_csv(input_filepath, output_filepath):
         print(f"Processed {rows_processed} data rows.")
         print(f"Kept {rows_kept} data rows.")
 
+
 def _transform_value(header, value):
     """
     Normalize all values to Exajoules
     """
-    if (header in ("biodiesel_cons_pj", "biofuels_cons_pj", "ethanol_cons_pj")):
+    if header in ("biodiesel_cons_pj", "biofuels_cons_pj", "ethanol_cons_pj"):
         # Convert Petajoules to Exajoules
         return float(value) / 1000.0
     elif header == "elect_twh":
@@ -205,13 +207,12 @@ def _transform_value(header, value):
         return float(value) * 0.0036
     return value
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python preprocess_ei_data.py <input_file> <output_file>")
         print(
-            "Example: python preprocess_ei_data.py"
-            " data/ei-world-consolidated-panel-2024.csv"
-            " data/filtered_ei_data.csv"
+            "Example: python preprocess_ei_data.py data/ei-world-consolidated-panel-2024.csv data/filtered_ei_data.csv"
         )
         sys.exit(1)
 

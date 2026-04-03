@@ -2,7 +2,6 @@ import csv
 import sys
 
 
-
 # Hard-coded lists for filtering. Feel free to modify these.
 ALLOWED_COUNTRIES = {
     "Argentina",
@@ -113,10 +112,11 @@ PRIMARY_ENERGY_PRODUCTS = {
     "Crude, NGL and feedstocks",
     "Natural gas",
     "Nuclear",
-    "Renewables and waste"
+    "Renewables and waste",
 }
 
 MIN_YEAR = 2000
+
 
 def process_csv(input_filepath, output_filepath):
     """
@@ -129,11 +129,12 @@ def process_csv(input_filepath, output_filepath):
     - Omit flows other than total energy supply
     - Omit all year columns before MIN_YEAR
     """
-    with open(input_filepath, 'r', newline='', encoding='utf-8') as infile, \
-         open(output_filepath, 'w', newline='', encoding='utf-8') as outfile:
-
+    with (
+        open(input_filepath, "r", newline="", encoding="utf-8") as infile,
+        open(output_filepath, "w", newline="", encoding="utf-8") as outfile,
+    ):
         reader = csv.reader(infile)
-        writer = csv.writer(outfile, lineterminator='\n')
+        writer = csv.writer(outfile, lineterminator="\n")
 
         # Read the first line (source info) and keep it as is
         source_line = next(reader, None)
@@ -190,6 +191,7 @@ def process_csv(input_filepath, output_filepath):
         print(f"Processed {rows_processed} data rows.")
         print(f"Kept {rows_kept} data rows.")
 
+
 def _is_flow_allowed(product, flow):
     if product == "Electricity" and flow == "Electricity, CHP and heat plants (PJ)":
         return True
@@ -197,17 +199,17 @@ def _is_flow_allowed(product, flow):
         return True
     return False
 
+
 def _is_primary_energy(product):
     # Exclude secondary energy products such as refined oil and heat
     return product in PRIMARY_ENERGY_PRODUCTS
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python preprocess_iea_data.py <input_file> <output_file>")
         print(
-            "Example: python preprocess_iea_data.py"
-            " data/iea-world-energy-balances-2025.csv"
-            " data/filtered_iea_data.csv"
+            "Example: python preprocess_iea_data.py data/iea-world-energy-balances-2025.csv data/filtered_iea_data.csv"
         )
         sys.exit(1)
 

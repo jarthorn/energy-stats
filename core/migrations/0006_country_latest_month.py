@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0005_add_country_fuel_model'),
+        ("core", "0005_add_country_fuel_model"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='country',
-            name='latest_month',
-            field=models.DateField(blank=True, help_text='The most recent month for which data is available', null=True),
+            model_name="country",
+            name="latest_month",
+            field=models.DateField(
+                blank=True, help_text="The most recent month for which data is available", null=True
+            ),
         ),
     ]

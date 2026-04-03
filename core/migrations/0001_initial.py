@@ -4,25 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='MonthlyGenerationData',
+            name="MonthlyGenerationData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('country', models.CharField(max_length=100)),
-                ('country_code', models.CharField(max_length=10)),
-                ('is_aggregate_entity', models.BooleanField()),
-                ('date', models.DateField()),
-                ('fuel_type', models.CharField(max_length=100)),
-                ('is_aggregate_series', models.BooleanField()),
-                ('generation_twh', models.FloatField()),
-                ('share_of_generation_pct', models.FloatField()),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("country", models.CharField(max_length=100)),
+                ("country_code", models.CharField(max_length=10)),
+                ("is_aggregate_entity", models.BooleanField()),
+                ("date", models.DateField()),
+                ("fuel_type", models.CharField(max_length=100)),
+                ("is_aggregate_series", models.BooleanField()),
+                ("generation_twh", models.FloatField()),
+                ("share_of_generation_pct", models.FloatField()),
             ],
         ),
     ]

@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0010_countryfuelyear'),
+        ("core", "0010_countryfuelyear"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fuel',
-            name='generation_all_time',
-            field=models.FloatField(default=0.0, help_text='Total electricity generation from this fuel source across all recorded data (TWh)'),
+            model_name="fuel",
+            name="generation_all_time",
+            field=models.FloatField(
+                default=0.0,
+                help_text="Total electricity generation from this fuel source across all recorded data (TWh)",
+            ),
         ),
     ]

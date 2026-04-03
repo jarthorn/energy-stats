@@ -4,20 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0008_countryfuel_annual_yoy_growth_and_more'),
+        ("core", "0008_countryfuel_annual_yoy_growth_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='countryfuel',
-            name='generation_latest_month',
-            field=models.FloatField(blank=True, help_text='Electricity generation in the most recent month (TWh)', null=True),
+            model_name="countryfuel",
+            name="generation_latest_month",
+            field=models.FloatField(
+                blank=True, help_text="Electricity generation in the most recent month (TWh)", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='countryfuel',
-            name='share_latest_month',
-            field=models.FloatField(blank=True, help_text="Percentage of this country's electricity supplied by this fuel in the most recent month (%)", null=True),
+            model_name="countryfuel",
+            name="share_latest_month",
+            field=models.FloatField(
+                blank=True,
+                help_text="Percentage of this country's electricity supplied by this fuel in the most recent month (%)",
+                null=True,
+            ),
         ),
     ]

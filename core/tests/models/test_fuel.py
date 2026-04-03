@@ -18,5 +18,6 @@ class FuelModelTests(TestCase):
         """Two Fuel rows cannot share the same type string."""
         Fuel.objects.create(type="Wind", rank=2, summary="Wind energy summary.")
         from django.db import IntegrityError
+
         with self.assertRaises(IntegrityError):
             Fuel.objects.create(type="Wind", rank=99, summary="Duplicate.")

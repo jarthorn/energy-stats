@@ -53,18 +53,14 @@ class Command(BaseCommand):
             except Exception as exc:  # noqa: BLE001
                 raise CommandError(str(exc)) from exc
         else:
-            country_codes = list(
-                MonthlyGenerationData.objects.values_list("country_code", flat=True).distinct()
-            )
+            country_codes = list(MonthlyGenerationData.objects.values_list("country_code", flat=True).distinct())
 
         total_countries = len(country_codes)
         if total_countries == 0:
             self.stdout.write("No countries found in MonthlyGenerationData. Nothing to do.")
             return
 
-        self.stdout.write(
-            f"Starting backfill of MonthlyGenerationRecord for {total_countries} countries..."
-        )
+        self.stdout.write(f"Starting backfill of MonthlyGenerationRecord for {total_countries} countries...")
 
         total_created = 0
 
@@ -73,35 +69,20 @@ class Command(BaseCommand):
 
             country_obj = Country.objects.filter(code=code).first()
             if country_obj is None:
-                self.stderr.write(
-                    self.style.WARNING(
-                        f"  Skipping {code}: no matching Country record found."
-                    )
-                )
+                self.stderr.write(self.style.WARNING(f"  Skipping {code}: no matching Country record found."))
                 continue
 
-            records = (
-                MonthlyGenerationData.objects.filter(country_code=code)
-                .order_by("date")
-            )
+            records = MonthlyGenerationData.objects.filter(country_code=code).order_by("date")
 
             if not records.exists():
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"  No data found in MonthlyGenerationData for {code}."
-                    )
-                )
+                self.stdout.write(self.style.WARNING(f"  No data found in MonthlyGenerationData for {code}."))
                 continue
 
             with transaction.atomic():
                 # Always remove any existing records for this country first.
-                deleted_count, _ = MonthlyGenerationRecord.objects.filter(
-                    country=country_obj
-                ).delete()
+                deleted_count, _ = MonthlyGenerationRecord.objects.filter(country=country_obj).delete()
                 if deleted_count:
-                    self.stdout.write(
-                        f"  Deleted {deleted_count} existing MonthlyGenerationRecord rows for {code}."
-                    )
+                    self.stdout.write(f"  Deleted {deleted_count} existing MonthlyGenerationRecord rows for {code}.")
 
                 created_for_country = self._backfill_country_records(
                     country_obj=country_obj,
@@ -109,14 +90,10 @@ class Command(BaseCommand):
                 )
 
             total_created += created_for_country
-            self.stdout.write(
-                f"  Created {created_for_country} MonthlyGenerationRecord rows for {code}."
-            )
+            self.stdout.write(f"  Created {created_for_country} MonthlyGenerationRecord rows for {code}.")
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"\nBackfill complete. Created {total_created} MonthlyGenerationRecord rows."
-            )
+            self.style.SUCCESS(f"\nBackfill complete. Created {total_created} MonthlyGenerationRecord rows.")
         )
 
     def _backfill_country_records(self, *, country_obj: Country, records) -> int:
@@ -131,14 +108,11 @@ class Command(BaseCommand):
             if not fuel_type:
                 continue
 
-            fuel_records = (
-                records.filter(
-                    fuel_type=fuel_type,
-                    is_aggregate_entity=False,
-                    is_aggregate_series=False,
-                )
-                .order_by("date")
-            )
+            fuel_records = records.filter(
+                fuel_type=fuel_type,
+                is_aggregate_entity=False,
+                is_aggregate_series=False,
+            ).order_by("date")
 
             if not fuel_records.exists():
                 continue
@@ -189,4 +163,3 @@ class Command(BaseCommand):
                 created_count += len(to_create)
 
         return created_count
-

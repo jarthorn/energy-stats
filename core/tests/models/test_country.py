@@ -36,6 +36,7 @@ class CountryModelTests(TestCase):
             generation_previous_12_months=558.1,
         )
         from django.db import IntegrityError
+
         with self.assertRaises(IntegrityError):
             Country.objects.create(
                 name="Duplicate",

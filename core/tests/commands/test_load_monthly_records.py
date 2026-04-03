@@ -74,15 +74,12 @@ class LoadMonthlyRecordsCommandTests(TestCase):
         expected_records = 0
         fuel_types = ["Coal", "Wind", "Solar"]
         for fuel in fuel_types:
-            fuel_rows = (
-                MonthlyGenerationData.objects.filter(
-                    country_code=self.country.code,
-                    fuel_type=fuel,
-                    is_aggregate_entity=False,
-                    is_aggregate_series=False,
-                )
-                .order_by("date")
-            )
+            fuel_rows = MonthlyGenerationData.objects.filter(
+                country_code=self.country.code,
+                fuel_type=fuel,
+                is_aggregate_entity=False,
+                is_aggregate_series=False,
+            ).order_by("date")
 
             max_generation = None
             max_share = None
@@ -100,19 +97,13 @@ class LoadMonthlyRecordsCommandTests(TestCase):
                     expected_records += 1
 
         # Assert that the command created exactly the number of records we expect
-        created_records = MonthlyGenerationRecord.objects.filter(
-            country=self.country
-        ).count()
+        created_records = MonthlyGenerationRecord.objects.filter(country=self.country).count()
         self.assertEqual(created_records, expected_records)
         fuel_generation_records = MonthlyGenerationRecord.objects.filter(
-            country=self.country,
-            fuel=Fuel.objects.get(type="Coal"),
-            record_type="generation"
+            country=self.country, fuel=Fuel.objects.get(type="Coal"), record_type="generation"
         )
         self.assertEqual(6, fuel_generation_records.count())
         wind_share_records = MonthlyGenerationRecord.objects.filter(
-            country=self.country,
-            fuel=Fuel.objects.get(type="Wind"),
-            record_type="share"
+            country=self.country, fuel=Fuel.objects.get(type="Wind"), record_type="share"
         )
         self.assertEqual(7, wind_share_records.count())

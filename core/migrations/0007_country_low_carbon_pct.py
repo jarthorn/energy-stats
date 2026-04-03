@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_country_latest_month'),
+        ("core", "0006_country_latest_month"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='country',
-            name='low_carbon_pct',
-            field=models.FloatField(blank=True, help_text="Percentage share of this country's fuels that come from low carbon sources", null=True),
+            model_name="country",
+            name="low_carbon_pct",
+            field=models.FloatField(
+                blank=True,
+                help_text="Percentage share of this country's fuels that come from low carbon sources",
+                null=True,
+            ),
         ),
     ]

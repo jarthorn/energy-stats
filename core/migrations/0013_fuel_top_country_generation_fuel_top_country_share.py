@@ -5,20 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0012_fuel_generation_latest_12_months'),
+        ("core", "0012_fuel_generation_latest_12_months"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fuel',
-            name='top_country_generation',
-            field=models.ForeignKey(blank=True, help_text='The country with the most generation from this fuel over the latest 12 months', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='top_generation_fuels', to='core.country'),
+            model_name="fuel",
+            name="top_country_generation",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The country with the most generation from this fuel over the latest 12 months",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="top_generation_fuels",
+                to="core.country",
+            ),
         ),
         migrations.AddField(
-            model_name='fuel',
-            name='top_country_share',
-            field=models.ForeignKey(blank=True, help_text='The country with the largest generation share from this fuel over 12 months', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='top_share_fuels', to='core.country'),
+            model_name="fuel",
+            name="top_country_share",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The country with the largest generation share from this fuel over 12 months",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="top_share_fuels",
+                to="core.country",
+            ),
         ),
     ]

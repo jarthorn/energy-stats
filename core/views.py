@@ -19,16 +19,17 @@ from plotly.subplots import make_subplots
 BAR_CHART_COLOR = "#2ecc71"
 SCATTER_CHART_COLOR = "#cc2e89"
 
+
 def index(request):
-    return render(request, 'core/index.html')
+    return render(request, "core/index.html")
+
 
 def about(request):
     return render(request, "core/about.html")
 
+
 def country_index(request):
-    latest_energy_balance = CountryEnergyBalanceYear.objects.filter(country=OuterRef("pk")).order_by(
-        "-year"
-    )
+    latest_energy_balance = CountryEnergyBalanceYear.objects.filter(country=OuterRef("pk")).order_by("-year")
 
     countries = list(
         Country.objects.order_by("electricity_rank").annotate(
@@ -40,15 +41,16 @@ def country_index(request):
 
     for country in countries:
         country.yoy_growth_pct = _growth_rate(
-            country.generation_latest_12_months,
-            country.generation_previous_12_months
+            country.generation_latest_12_months, country.generation_previous_12_months
         )
 
-    return render(request, 'core/country_index.html', {'countries': countries})
+    return render(request, "core/country_index.html", {"countries": countries})
+
 
 def fuel_index(request):
-    fuels = Fuel.objects.all().order_by('rank')
-    return render(request, 'core/fuel_index.html', {'fuels': fuels})
+    fuels = Fuel.objects.all().order_by("rank")
+    return render(request, "core/fuel_index.html", {"fuels": fuels})
+
 
 def country_detail(request, code):
     country = get_object_or_404(Country, code=code)
@@ -113,9 +115,7 @@ def country_detail(request, code):
         primary_energy_supply_donut_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
 
     # Stacked area chart: energy supply mix (%) over time
-    balance_years = list(
-        CountryEnergyBalanceYear.objects.filter(country=country).order_by("year")
-    )
+    balance_years = list(CountryEnergyBalanceYear.objects.filter(country=country).order_by("year"))
     if balance_years:
         years = []
         coal_pct = []
@@ -220,9 +220,7 @@ def country_detail(request, code):
             fig_area.update_xaxes(type="category", showgrid=False, title_text="<b>Year</b>")
 
             include_js = "cdn" if not primary_energy_supply_donut_html else False
-            primary_energy_supply_area_html = fig_area.to_html(
-                full_html=False, include_plotlyjs=include_js
-            )
+            primary_energy_supply_area_html = fig_area.to_html(full_html=False, include_plotlyjs=include_js)
 
     yoy_growth_pct = _growth_rate(country.generation_latest_12_months, country.generation_previous_12_months)
 
@@ -242,7 +240,7 @@ def country_detail(request, code):
         largest_source = country_fuels.order_by("-generation_latest_12_months").first()
 
     fastest_growing_source = None
-    max_growth = float('-inf')
+    max_growth = float("-inf")
 
     for cf in country_fuels:
         growth = _growth_rate(cf.generation_latest_12_months, cf.generation_previous_12_months)
@@ -250,7 +248,7 @@ def country_detail(request, code):
             max_growth = growth
             fastest_growing_source = cf
 
-    if max_growth == float('-inf'):
+    if max_growth == float("-inf"):
         max_growth = None
 
     fastest_growing_pct = max_growth
@@ -278,9 +276,7 @@ def country_detail(request, code):
                 "peak_month": latest_record.date,
                 "peak_generation": latest_record.generation_twh,
                 "previous_peak_month": previous_record.date if previous_record else None,
-                "previous_peak_generation": (
-                    previous_record.generation_twh if previous_record else None
-                ),
+                "previous_peak_generation": (previous_record.generation_twh if previous_record else None),
             }
         )
 
@@ -298,16 +294,15 @@ def country_detail(request, code):
         "fastest_growing_pct": fastest_growing_pct,
         "monthly_generation_records": monthly_record_rows,
     }
-    return render(request, 'core/country_detail.html', context)
+    return render(request, "core/country_detail.html", context)
+
 
 def country_fuel_detail(request, code, fuel_type):
     country = get_object_or_404(Country, code=code)
     country_fuel = get_object_or_404(CountryFuel, country=country, fuel__type=fuel_type)
 
     # Fetch annual data for the graph
-    annual_data = CountryFuelYear.objects.filter(
-        country=country, fuel__type=fuel_type
-    ).order_by('year')
+    annual_data = CountryFuelYear.objects.filter(country=country, fuel__type=fuel_type).order_by("year")
 
     years = [d.year for d in annual_data]
     generations = [d.generation for d in annual_data]
@@ -418,13 +413,14 @@ def country_fuel_detail(request, code, fuel_type):
         "graph_html": graph_html,
         "monthly_graph_html": monthly_graph_html,
     }
-    return render(request, 'core/country_fuel_detail.html', context)
+    return render(request, "core/country_fuel_detail.html", context)
+
 
 def fuel_detail(request, fuel_type):
     fuel = get_object_or_404(Fuel, type=fuel_type)
 
     # Fetch annual global data for the graph
-    annual_data = FuelYear.objects.filter(fuel=fuel).order_by('year')
+    annual_data = FuelYear.objects.filter(fuel=fuel).order_by("year")
 
     years = [d.year for d in annual_data]
     generations = [d.generation for d in annual_data]
@@ -447,16 +443,16 @@ def fuel_detail(request, fuel_type):
 
         fig.update_layout(
             title_text=f"Global {fuel.type} Generation and Share over Time",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
 
-        fig.update_yaxes(title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(title_text="<b>Generation</b> (TWh)", secondary_y=False, showgrid=True, gridcolor="lightgray")
         fig.update_yaxes(title_text="<b>Share</b> (%)", secondary_y=True, showgrid=False)
-        fig.update_xaxes(type='category', showgrid=False)
+        fig.update_xaxes(type="category", showgrid=False)
 
-        graph_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
 
     # Fetch country distribution (and also build "Top Countries" slices from it).
     #
@@ -464,9 +460,7 @@ def fuel_detail(request, fuel_type):
     # - the full country table (ordered by generation)
     # - the three top-ten lists (generation/share/annual YoY growth).
     country_fuels = list(
-        CountryFuel.objects.filter(fuel=fuel)
-        .select_related("country")
-        .order_by("-generation_latest_12_months")
+        CountryFuel.objects.filter(fuel=fuel).select_related("country").order_by("-generation_latest_12_months")
     )
 
     top_generation_countries = country_fuels[:10]
@@ -484,14 +478,14 @@ def fuel_detail(request, fuel_type):
     )[:10]
 
     context = {
-        'fuel': fuel,
-        'graph_html': graph_html,
-        'country_fuels': country_fuels,
-        'top_generation_countries': top_generation_countries,
-        'top_share_countries': top_share_countries,
-        'top_fastest_growing_countries': top_fastest_growing_countries,
+        "fuel": fuel,
+        "graph_html": graph_html,
+        "country_fuels": country_fuels,
+        "top_generation_countries": top_generation_countries,
+        "top_share_countries": top_share_countries,
+        "top_fastest_growing_countries": top_fastest_growing_countries,
     }
-    return render(request, 'core/fuel_detail.html', context)
+    return render(request, "core/fuel_detail.html", context)
 
 
 def monthly_generation_records_index(request):
@@ -541,9 +535,7 @@ def monthly_generation_records_index(request):
         .order_by("country__name")
     ]
     fuel_type_choices = list(
-        MonthlyGenerationRecord.objects.values_list("fuel__type", flat=True)
-        .distinct()
-        .order_by("fuel__type")
+        MonthlyGenerationRecord.objects.values_list("fuel__type", flat=True).distinct().order_by("fuel__type")
     )
     record_type_choices = [
         ("generation", "Generation"),
@@ -565,6 +557,7 @@ def monthly_generation_records_index(request):
     }
     return render(request, "core/monthly_generation_records_index.html", context)
 
+
 def monthly_generation_records_detail(request, country_code, fuel_type, record_type):
     """
     All MonthlyGenerationRecord rows for one country, fuel, and record type, newest first.
@@ -585,6 +578,7 @@ def monthly_generation_records_detail(request, country_code, fuel_type, record_t
         "records": records,
     }
     return render(request, "core/monthly_generation_records_detail.html", context)
+
 
 def _growth_rate(latest, previous):
     if previous > 0:

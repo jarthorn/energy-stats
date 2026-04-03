@@ -36,10 +36,7 @@ def _parse_date(date_str: str) -> date:
 
 
 class Command(BaseCommand):
-    help = (
-        "Extract electricity generation data from the Ember API and load it "
-        "into the MonthlyGenerationData table."
-    )
+    help = "Extract electricity generation data from the Ember API and load it into the MonthlyGenerationData table."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -51,10 +48,7 @@ class Command(BaseCommand):
             "--country",
             nargs="*",
             metavar="CODE",
-            help=(
-                "ISO-3 country codes to load (e.g. GBR DEU). "
-                "Defaults to all known countries."
-            ),
+            help=("ISO-3 country codes to load (e.g. GBR DEU). Defaults to all known countries."),
         )
 
     def handle(self, *args, **options):
@@ -79,24 +73,16 @@ class Command(BaseCommand):
         self.stdout.write(f"Starting Extraction from Ember API for {total_countries} countries...")
 
         for idx, country_code in enumerate(country_codes, start=1):
-            self.stdout.write(
-                f"[{idx}/{total_countries}] Extracting {country_code}..."
-            )
+            self.stdout.write(f"[{idx}/{total_countries}] Extracting {country_code}...")
 
             try:
                 raw_records = client.fetch_country(country_code)
             except Exception as exc:  # noqa: BLE001
-                self.stderr.write(
-                    self.style.WARNING(
-                        f"  Skipping {country_code}: API error — {exc}"
-                    )
-                )
+                self.stderr.write(self.style.WARNING(f"  Skipping {country_code}: API error — {exc}"))
                 continue
 
             if not raw_records:
-                self.stdout.write(
-                    self.style.WARNING(f"  No data returned for {country_code}.")
-                )
+                self.stdout.write(self.style.WARNING(f"  No data returned for {country_code}."))
                 continue
 
             monthly_created = monthly_updated = 0
@@ -122,9 +108,6 @@ class Command(BaseCommand):
                 else:
                     monthly_updated += 1
 
-            self.stdout.write(
-                f"  MonthlyGenerationData: {monthly_created} created, "
-                f"{monthly_updated} updated."
-            )
+            self.stdout.write(f"  MonthlyGenerationData: {monthly_created} created, {monthly_updated} updated.")
 
         self.stdout.write(self.style.SUCCESS("Extraction complete."))

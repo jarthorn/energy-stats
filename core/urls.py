@@ -2,17 +2,17 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path("", views.index, name="index"),
     path("about/", views.about, name="about"),
-    path('countries/', views.country_index, name='country_index'),
-    path('countries/<str:code>/', views.country_detail, name='country_detail'),
-    path('countries/<str:code>/fuels/<str:fuel_type>/', views.country_fuel_detail, name='country_fuel_detail'),
-    path('fuels/', views.fuel_index, name='fuel_index'),
-    path('fuels/<str:fuel_type>/', views.fuel_detail, name='fuel_detail'),
-    path('records/', views.monthly_generation_records_index, name='monthly_generation_records_index'),
+    path("countries/", views.country_index, name="country_index"),
+    path("countries/<str:code>/", views.country_detail, name="country_detail"),
+    path("countries/<str:code>/fuels/<str:fuel_type>/", views.country_fuel_detail, name="country_fuel_detail"),
+    path("fuels/", views.fuel_index, name="fuel_index"),
+    path("fuels/<str:fuel_type>/", views.fuel_detail, name="fuel_detail"),
+    path("records/", views.monthly_generation_records_index, name="monthly_generation_records_index"),
     path(
-        'records/<str:country_code>/<str:fuel_type>/<str:record_type>/',
+        "records/<str:country_code>/<str:fuel_type>/<str:record_type>/",
         views.monthly_generation_records_detail,
-        name='monthly_generation_records_detail',
+        name="monthly_generation_records_detail",
     ),
 ]

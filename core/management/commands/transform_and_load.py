@@ -26,11 +26,9 @@ from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear, M
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
-    help = (
-        "Transform data from MonthlyGenerationData and load it into "
-        "Country, Fuel, and CountryFuel tables."
-    )
+    help = "Transform data from MonthlyGenerationData and load it into Country, Fuel, and CountryFuel tables."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -54,9 +52,7 @@ class Command(BaseCommand):
                 raise CommandError(str(exc)) from exc
         else:
             # Default to all countries that have data in our staging table
-            country_codes = set[str](
-                MonthlyGenerationData.objects.values_list("country_code", flat=True).distinct()
-            )
+            country_codes = set[str](MonthlyGenerationData.objects.values_list("country_code", flat=True).distinct())
 
         total_countries = len(country_codes)
         self.stdout.write(f"Starting Transform and Load for {total_countries} countries...")
@@ -106,9 +102,11 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("\nTransformation and Loading complete."))
 
+
 # ---------------------------------------------------------------------------
 # Transformation Helpers (Private)
 # ---------------------------------------------------------------------------
+
 
 def _get_date_windows(records) -> tuple[list[date], list[date]]:
     """
@@ -125,11 +123,8 @@ def _get_date_windows(records) -> tuple[list[date], list[date]]:
     previous_12 = unique_dates[-24:-12]
     return latest_12, previous_12
 
-def _transform_country_metrics(
-    records,
-    latest_12_dates: list[date],
-    previous_12_dates: list[date]
-) -> dict:
+
+def _transform_country_metrics(records, latest_12_dates: list[date], previous_12_dates: list[date]) -> dict:
     """
     Calculate country-level metrics: total generation for latest/previous
     windows and low-carbon percentage.
@@ -166,11 +161,8 @@ def _transform_country_metrics(
         "low_carbon_pct": low_carbon_pct,
     }
 
-def _transform_fuel_metrics(
-    fuel_records,
-    latest_12_dates: list[date],
-    previous_12_dates: list[date]
-) -> dict:
+
+def _transform_fuel_metrics(fuel_records, latest_12_dates: list[date], previous_12_dates: list[date]) -> dict:
     """Calculate per-fuel metrics: generation totals, average share, and growth."""
     fuel_by_date = {r.date: r.generation_twh for r in fuel_records}
     share_by_date = {r.date: r.share_of_generation_pct for r in fuel_records}
@@ -213,6 +205,7 @@ def _transform_fuel_metrics(
         "latest_month_share": share_by_date.get(latest_12_dates[-1], 0.0) if latest_12_dates else 0.0,
     }
 
+
 def _load_country(code: str, country_name: str, metrics: dict, latest_month: date) -> Country:
     """Persist transformed country metrics to the database (Load)."""
     country_obj, _ = Country.objects.update_or_create(
@@ -228,12 +221,8 @@ def _load_country(code: str, country_name: str, metrics: dict, latest_month: dat
     )
     return country_obj
 
-def _load_fuel_data(
-    country_obj: Country,
-    fuel_type: str,
-    metrics: dict,
-    latest_month: date
-) -> None:
+
+def _load_fuel_data(country_obj: Country, fuel_type: str, metrics: dict, latest_month: date) -> None:
     """Persist transformed fuel metrics and associations to the database (Load)."""
     fuel_obj, _ = Fuel.objects.update_or_create(
         type=fuel_type,
@@ -269,42 +258,27 @@ def _apply_rankings(stdout) -> None:
 
     stdout.write("Ranking fuel types by total global generation...")
     fuel_totals = (
-        CountryFuel.objects
-        .values("fuel__type")
-        .annotate(total=Sum("generation_latest_12_months"))
-        .order_by("-total")
+        CountryFuel.objects.values("fuel__type").annotate(total=Sum("generation_latest_12_months")).order_by("-total")
     )
     for rank, row in enumerate(fuel_totals, start=1):
         fuel_type = row["fuel__type"]
         total_gen = row["total"] or 0.0
 
         # Find country with most generation for this fuel
-        top_gen_cf = (
-            CountryFuel.objects.filter(fuel__type=fuel_type)
-            .order_by("-generation_latest_12_months")
-            .first()
-        )
+        top_gen_cf = CountryFuel.objects.filter(fuel__type=fuel_type).order_by("-generation_latest_12_months").first()
 
         # Find country with largest share for this fuel
-        top_share_cf = (
-            CountryFuel.objects.filter(fuel__type=fuel_type)
-            .order_by("-share")
-            .first()
-        )
+        top_share_cf = CountryFuel.objects.filter(fuel__type=fuel_type).order_by("-share").first()
 
         Fuel.objects.filter(type=fuel_type).update(
             rank=rank,
             generation_latest_12_months=total_gen,
             top_country_generation=top_gen_cf.country if top_gen_cf else None,
-            top_country_share=top_share_cf.country if top_share_cf else None
+            top_country_share=top_share_cf.country if top_share_cf else None,
         )
 
     stdout.write("Calculating all-time generation for fuel types...")
-    all_time_totals = (
-        MonthlyGenerationData.objects
-        .values("fuel_type")
-        .annotate(total=Sum("generation_twh"))
-    )
+    all_time_totals = MonthlyGenerationData.objects.values("fuel_type").annotate(total=Sum("generation_twh"))
     for row in all_time_totals:
         Fuel.objects.filter(type=row["fuel_type"]).update(generation_all_time=row["total"] or 0.0)
 
@@ -318,9 +292,8 @@ def _apply_rankings(stdout) -> None:
     year_totals = {row["date__year"]: row["total"] for row in global_annual_totals}
 
     # 2. Calculate global fuel generation per year
-    fuel_annual_totals = (
-        MonthlyGenerationData.objects.values("fuel_type", "date__year")
-        .annotate(total=Sum("generation_twh"))
+    fuel_annual_totals = MonthlyGenerationData.objects.values("fuel_type", "date__year").annotate(
+        total=Sum("generation_twh")
     )
 
     for row in fuel_annual_totals:
@@ -341,7 +314,7 @@ def _apply_rankings(stdout) -> None:
             defaults={
                 "generation": gen,
                 "share": share,
-            }
+            },
         )
 
     stdout.write("Updating fuel summaries from data/fuel-summaries.json...")
@@ -415,10 +388,7 @@ def _apply_fuel_summaries(stdout) -> None:
     summaries_path = Path(settings.BASE_DIR) / "data" / "fuel-summaries.json"
 
     if not summaries_path.exists():
-        stdout.write(
-            f"  fuel-summaries.json not found at {summaries_path}. "
-            "Skipping fuel summary update."
-        )
+        stdout.write(f"  fuel-summaries.json not found at {summaries_path}. Skipping fuel summary update.")
         return
 
     try:
@@ -435,10 +405,14 @@ def _apply_fuel_summaries(stdout) -> None:
             fuel.summary = summary
         top_country_fuel_generation = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_generation)
         top_country_fuel_share = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_share)
-        country_fuel_summary = f" The country with the most generation from {fuel.type.lower()}"\
-            f" over the latest 12 months is {top_country_fuel_generation.country.name},"\
+        country_fuel_summary = (
+            f" The country with the most generation from {fuel.type.lower()}"
+            f" over the latest 12 months is {top_country_fuel_generation.country.name},"
             f" with {top_country_fuel_generation.generation_latest_12_months:,.0f} TWh."
-        country_fuel_summary += f" The country with the largest share of its generation from {fuel.type.lower()}"\
+        )
+        country_fuel_summary += (
+            f" The country with the largest share of its generation from {fuel.type.lower()}"
             f" is {top_country_fuel_share.country.name} at {top_country_fuel_share.share:.1f}%."
+        )
         fuel.summary += country_fuel_summary
         fuel.save(update_fields=["summary"])
