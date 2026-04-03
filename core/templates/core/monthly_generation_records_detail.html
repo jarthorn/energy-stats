@@ -25,13 +25,14 @@
     </nav>
 
     <h2 class="section-title">Record history</h2>
-    <p class="section-description">
-        Each row is a month when a new high was recorded for {{ fuel.type }} {{ record_type }} in {{ country.name }}.
-    </p>
 
     {% if graph_html %}
     <div class="graph-container">
-        <div class="graph-title">Record values over time</div>
+        <div class="graph-title">
+            {{ fuel.type }} generation
+            {% if record_type == "share" %}share{% endif %}
+            records for {{ country.name }}.
+        </div>
         {{ graph_html|safe }}
     </div>
     {% endif %}
@@ -40,28 +41,26 @@
         <thead>
             <tr>
                 <th>Date</th>
+                {% if record_type == "generation" %}
                 <th class="num-col">Generation (TWh)</th>
+                {% else %}
                 <th class="num-col">Share of Generation (%)</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for record in records %}
             <tr>
                 <td>{{ record.date|date:"F Y" }}</td>
-                <td class="num-col">
-                    {% if record.record_type == "generation" %}
-                    {{ record.generation_twh|floatformat:2 }}
-                    {% endif %}
-                </td>
-                <td class="num-col">
-                    {% if record.record_type == "share" %}
-                    {{ record.share_of_generation_pct|floatformat:2 }}
-                    {% endif %}
-                </td>
+                {% if record_type == "generation" %}
+                <td class="num-col">{{ record.generation_twh|floatformat:2 }}</td>
+                {% else %}
+                <td class="num-col">{{ record.share_of_generation_pct|floatformat:2 }}</td>
+                {% endif %}
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px;">
+                <td colspan="2" style="text-align: center; color: #95a5a6; padding: 30px;">
                     No records found for this combination.
                 </td>
             </tr>
