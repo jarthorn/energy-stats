@@ -27,6 +27,7 @@
     <h2 class="section-title">Monthly generation records</h2>
     <p class="section-description">
         Use the filters below to narrow down by country, fuel type, record type, or date range.
+        Select a row to view the record history for that country, fuel, and record type.
     </p>
 
     <form method="get" class="filter-form">
@@ -86,7 +87,8 @@
         </thead>
         <tbody>
             {% for record in page_obj.object_list %}
-            <tr>
+            <tr onclick="window.location.href='{% url 'monthly_generation_records_detail' record.country.code record.fuel.type record.record_type %}';"
+                style="cursor: pointer;">
                 <td>{{ record.country.name }} ({{ record.country.code }})</td>
                 <td>{{ record.fuel.type }}</td>
                 <td>{{ record.record_type|title }}</td>
