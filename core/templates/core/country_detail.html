@@ -196,14 +196,11 @@
     </table>
     {% endif %}
 
-    <h2 class="section-title">Primary Energy Supply</h2>
+    <h2 class="section-title">Total Energy Supply</h2>
     <p class="primary-energy-intro">
-        Primary energy supply represents all energy available for use in a country:
-        domestic production plus imports minus exports. Values below come from the latest
-        available year in the Energy Institute's
-        <a href="https://www.energyinst.org/statistical-review/about">Statistical Review of World Energy</a>.
-        Note that electricity is not considered part of primary energy supply, but it does include the primary
-        energy used for electricity generation.
+        Total energy supply represents all primary energy available for use in a country:
+        domestic production, plus imports, minus exports and storage. Primary energy can be a misleading concept!
+        Please read the caveats on the <a href="{% url 'about' %}#primary-energy">about page</a> for more information.
     </p>
     {% if primary_energy_balance %}
     <div class="dashboard">
