@@ -15,3 +15,8 @@ A secondary objective is enabling the author to learn more about Python and Djan
 # Data sources
 
 This project uses source data from several different organizations. Since each organization has slightly varying methodologies, it is important that we never directly compare or combine data together from multiple sources. For electricity generation data, Ember is the preferred data source. For total energy supply and primary energy sources, we use data from the Energy Institute's data sets.
+
+# General instructions
+
+- Don't reformat or modify unrelated parts of the code when you make a change. The diff for each change should always be relevant to the change that I requested. I don't like to mix cosmetic and behavioural changes in the same commit.
+- I am an experienced developer, you don't need to offer to make trivial code changes for me.
