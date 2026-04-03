@@ -566,16 +566,65 @@ def monthly_generation_records_detail(request, country_code, fuel_type, record_t
         raise Http404("Invalid record type")
     country = get_object_or_404(Country, code=country_code.upper())
     fuel = get_object_or_404(Fuel, type=fuel_type)
-    records = (
+    records = list(
         MonthlyGenerationRecord.objects.filter(country=country, fuel=fuel, record_type=record_type)
         .select_related("country", "fuel")
         .order_by("-date")
     )
+
+    graph_html = None
+    if records:
+        chronological = list(reversed(records))
+        dates = [r.date for r in chronological]
+        if record_type == "generation":
+            quantities = [r.generation_twh for r in chronological]
+            y_axis_title = "<b>Generation</b> (TWh)"
+            hover_suffix = " TWh"
+        else:
+            quantities = [r.share_of_generation_pct for r in chronological]
+            y_axis_title = "<b>Share of generation</b> (%)"
+            hover_suffix = " %"
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=dates,
+                y=quantities,
+                mode="lines+markers",
+                line=dict(color=BAR_CHART_COLOR, width=3),
+                marker=dict(size=7),
+                hovertemplate="%{x|%b %Y}<br>%{y:.2f}" + hover_suffix + "<extra></extra>",
+            )
+        )
+        fig.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=50, r=20, t=20, b=50),
+            showlegend=False,
+        )
+        fig.update_xaxes(
+            type="date",
+            title_text="<b>Month</b>",
+            showgrid=True,
+            gridcolor="lightgray",
+            tickformat="%b %Y",
+        )
+        yaxis_kwargs = {
+            "title_text": y_axis_title,
+            "showgrid": True,
+            "gridcolor": "lightgray",
+        }
+        if record_type == "generation":
+            yaxis_kwargs["rangemode"] = "tozero"
+        fig.update_yaxes(**yaxis_kwargs)
+        graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
     context = {
         "country": country,
         "fuel": fuel,
         "record_type": record_type,
         "records": records,
+        "graph_html": graph_html,
     }
     return render(request, "core/monthly_generation_records_detail.html", context)
 

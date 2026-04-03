@@ -29,6 +29,13 @@
         Each row is a month when a new high was recorded for {{ fuel.type }} {{ record_type }} in {{ country.name }}.
     </p>
 
+    {% if graph_html %}
+    <div class="graph-container">
+        <div class="graph-title">Record values over time</div>
+        {{ graph_html|safe }}
+    </div>
+    {% endif %}
+
     <table class="data-table">
         <thead>
             <tr>
