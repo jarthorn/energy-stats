@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.db.models import OuterRef, Subquery
 from .models import (
@@ -563,6 +564,27 @@ def monthly_generation_records_index(request):
         "record_type_choices": record_type_choices,
     }
     return render(request, "core/monthly_generation_records_index.html", context)
+
+def monthly_generation_records_detail(request, country_code, fuel_type, record_type):
+    """
+    All MonthlyGenerationRecord rows for one country, fuel, and record type, newest first.
+    """
+    if record_type not in ("generation", "share"):
+        raise Http404("Invalid record type")
+    country = get_object_or_404(Country, code=country_code.upper())
+    fuel = get_object_or_404(Fuel, type=fuel_type)
+    records = (
+        MonthlyGenerationRecord.objects.filter(country=country, fuel=fuel, record_type=record_type)
+        .select_related("country", "fuel")
+        .order_by("-date")
+    )
+    context = {
+        "country": country,
+        "fuel": fuel,
+        "record_type": record_type,
+        "records": records,
+    }
+    return render(request, "core/monthly_generation_records_detail.html", context)
 
 def _growth_rate(latest, previous):
     if previous > 0:

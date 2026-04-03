@@ -10,4 +10,9 @@ urlpatterns = [
     path('fuels/', views.fuel_index, name='fuel_index'),
     path('fuels/<str:fuel_type>/', views.fuel_detail, name='fuel_detail'),
     path('records/', views.monthly_generation_records_index, name='monthly_generation_records_index'),
+    path(
+        'records/<str:country_code>/<str:fuel_type>/<str:record_type>/',
+        views.monthly_generation_records_detail,
+        name='monthly_generation_records_detail',
+    ),
 ]

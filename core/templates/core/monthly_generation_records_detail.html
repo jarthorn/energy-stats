@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+
+{% block title %}Energy Stats — {{ country.name }} — {{ fuel.type }} — {{ record_type|title }} records{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        {{ country.name }} ({{ country.code }})
+        <span class="page-pill">{{ fuel.type }}</span>
+        <span class="page-pill">{{ record_type|title }}</span>
+    </div>
+    <div class="page-subtitle">
+        Monthly {{ fuel.type.lower }} generation records for {{ country.name }}.
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'monthly_generation_records_index' %}">Records</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">{{ country.name }} — {{ fuel.type }} — {{ record_type|title }}</span>
+    </nav>
+
+    <h2 class="section-title">Record history</h2>
+    <p class="section-description">
+        Each row is a month when a new high was recorded for {{ fuel.type }} {{ record_type }} in {{ country.name }}.
+    </p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th class="num-col">Generation (TWh)</th>
+                <th class="num-col">Share of Generation (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.date|date:"F Y" }}</td>
+                <td class="num-col">
+                    {% if record.record_type == "generation" %}
+                    {{ record.generation_twh|floatformat:2 }}
+                    {% endif %}
+                </td>
+                <td class="num-col">
+                    {% if record.record_type == "share" %}
+                    {{ record.share_of_generation_pct|floatformat:2 }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px;">
+                    No records found for this combination.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
