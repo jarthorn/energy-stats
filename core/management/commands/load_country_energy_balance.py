@@ -57,18 +57,15 @@ def _ej_to_pj_int(value: str) -> int:
     return int(round(float(value) * 1000))
 
 
-def _twh_to_pj_int(value: str) -> int:
+def _twh_to_pj_int(value: str, *, thermal_efficiency: float) -> int:
     """
     Use conversion factor of 1 kWh = 3600 kJ (1 TWh = 3.6 PJ) used by the Energy Institute.
-    To calculate total energy, we need to account for the thermal efficiency of the power plant.
-    While the Energy Institute methodology states that they use a sliding thermal efficiency rating, their
-    data indicates that they use a fixed thermal efficiency rating of 33%.
-    For example, for Canada in 2024 the EI Statistical Review of World Energy provides:
-         electbyfuel_nuclear = 85.46766891.
-         nuclear_ej = 0.93237457 (which is 932.37457 PJ)
-         85.46766891 * 3.6 / 0.33 = 932.37.45699
+
+    To calculate primary energy equivalent from electricity generation, we account for thermal efficiency.
+    We use fuel-specific thermal efficiencies (gas 45%, coal 32%, oil 32%) based on EIA (2019 U.S. plants):
+    https://www.eia.gov/todayinenergy/detail.php?id=44436
     """
-    return int(round(float(value) * 3.6 / 0.33))
+    return int(round(float(value) * 3.6 / thermal_efficiency))
 
 
 def _parse_ej_float(value: str) -> float:
@@ -132,9 +129,9 @@ class Command(BaseCommand):
                 # To calculate electricity share, we need to include the energy used by fossil fuels for electricity
                 # generation and we assume that all renewable and nuclear energy is used for electricity generation.
                 electricity_pj = (
-                    _twh_to_pj_int(row["electbyfuel_coal"])
-                    + _twh_to_pj_int(row["electbyfuel_gas"])
-                    + _twh_to_pj_int(row["electbyfuel_oil"])
+                    _twh_to_pj_int(row["electbyfuel_coal"], thermal_efficiency=0.32)
+                    + _twh_to_pj_int(row["electbyfuel_gas"], thermal_efficiency=0.45)
+                    + _twh_to_pj_int(row["electbyfuel_oil"], thermal_efficiency=0.32)
                     + nuclear_pj
                     + renewable_pj
                 )
