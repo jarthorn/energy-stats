@@ -9,6 +9,7 @@ urlpatterns = [
     path("countries/<str:code>/fuels/<str:fuel_type>/", views.country_fuel_detail, name="country_fuel_detail"),
     path("fuels/", views.fuel_index, name="fuel_index"),
     path("fuels/<str:fuel_type>/", views.fuel_detail, name="fuel_detail"),
+    path("tracker/", views.tracker_index, name="tracker_index"),
     path("records/", views.monthly_generation_records_index, name="monthly_generation_records_index"),
     path(
         "records/<str:country_code>/<str:fuel_type>/<str:record_type>/",

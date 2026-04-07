@@ -24,6 +24,10 @@ def index(request):
     return render(request, "core/index.html")
 
 
+def tracker_index(request):
+    return render(request, "core/tracker_index.html")
+
+
 def about(request):
     return render(request, "core/about.html")
 
