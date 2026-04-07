@@ -27,5 +27,6 @@ class Command(BaseCommand):
         call_command("transform_and_load")
         call_command("load_monthly_records")
         call_command("load_country_energy_balance")
+        call_command("backfill_country_tracker_years")
 
         self.stdout.write(self.style.SUCCESS("Production ETL pipeline complete."))

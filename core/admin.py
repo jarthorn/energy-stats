@@ -8,6 +8,7 @@ from .models import (
     MonthlyGenerationData,
     MonthlyGenerationRecord,
     CountryEnergyBalanceYear,
+    CountryTrackerYear,
 )
 
 
@@ -67,4 +68,17 @@ class CountryEnergyBalanceYearAdmin(admin.ModelAdmin):
         "country",
         "year",
     )
+    search_fields = ("country__name", "country__code")
+
+@admin.register(CountryTrackerYear)
+class CountryTrackerYearAdmin(admin.ModelAdmin):
+    list_display = (
+        "country",
+        "year",
+        "electricity_rank",
+        "electricity_share_low_carbon",
+        "share_electricity",
+        "energy_share_low_carbon",
+    )
+    list_filter = ("country", "year")
     search_fields = ("country__name", "country__code")
