@@ -199,6 +199,35 @@ class CountryEnergyBalanceYear(models.Model):
         return f"{self.country} - {self.year}"
 
 
+class CountryTrackerYear(models.Model):
+    """
+    Memoized tracker metrics for one country and one calendar year.
+    """
+
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="tracker_years",
+        help_text="Country this tracker row applies to",
+    )
+    year = models.IntegerField(help_text="Calendar year")
+    electricity_rank = models.IntegerField(help_text="The country's rank as an electricity producer")
+    electricity_share_low_carbon = models.FloatField(
+        help_text="Share of electricity generation from low-carbon sources (%)"
+    )
+    share_electricity = models.FloatField(help_text="Share of primary energy that is generating electricity (%)")
+    energy_share_low_carbon = models.FloatField(help_text="Share of primary energy from low-carbon sources (%)")
+
+    class Meta:
+        verbose_name = "country tracker year"
+        verbose_name_plural = "country tracker years"
+        unique_together = [("country", "year")]
+        ordering = ["country", "year"]
+
+    def __str__(self):
+        return f"{self.country} - {self.year}"
+
+
 class MonthlyGenerationRecord(models.Model):
     country = models.ForeignKey(
         Country,
