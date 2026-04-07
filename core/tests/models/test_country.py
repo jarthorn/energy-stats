@@ -14,7 +14,7 @@ class CountryModelTests(TestCase):
             generation_latest_12_months=542.3,
             generation_previous_12_months=558.1,
             latest_month=date(2023, 12, 1),
-            low_carbon_pct=55.4,
+            share_low_carbon=55.4,
         )
         self.assertEqual(country.name, "Germany")
         self.assertEqual(country.code, "DEU")
@@ -22,7 +22,7 @@ class CountryModelTests(TestCase):
         self.assertEqual(country.generation_latest_12_months, 542.3)
         self.assertEqual(country.generation_previous_12_months, 558.1)
         self.assertEqual(country.latest_month, date(2023, 12, 1))
-        self.assertEqual(country.low_carbon_pct, 55.4)
+        self.assertEqual(country.share_low_carbon, 55.4)
         self.assertEqual(str(country), "Germany (DEU)")
 
     def test_country_code_is_unique(self):

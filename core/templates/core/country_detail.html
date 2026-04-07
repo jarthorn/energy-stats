@@ -74,9 +74,9 @@
         <!-- Low Carbon Share -->
         <div class="gauge-card tooltip">
             <div class="gauge-label">Low‑carbon Share</div>
-            {% if country.low_carbon_pct is not None %}
-            <div class="speedometer" style="--value: {{ country.low_carbon_pct|floatformat:2 }};">
-                <div class="speedometer-value">{{ country.low_carbon_pct|floatformat:1 }}%</div>
+            {% if country.share_low_carbon is not None %}
+            <div class="speedometer" style="--value: {{ country.share_low_carbon|floatformat:2 }};">
+                <div class="speedometer-value">{{ country.share_low_carbon|floatformat:1 }}%</div>
             </div>
             {% else %}
             <div class="gauge-value">-</div>

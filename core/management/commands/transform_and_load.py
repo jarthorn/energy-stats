@@ -151,14 +151,14 @@ def _transform_country_metrics(records, latest_12_dates: list[date], previous_12
             if r.fuel_type in LOW_CARBON_FUELS:
                 low_carbon_generation += r.generation_twh
 
-    low_carbon_pct = None
+    share_low_carbon = None
     if total_generation_except_imports > 0:
-        low_carbon_pct = (low_carbon_generation / total_generation_except_imports) * 100
+        share_low_carbon = (low_carbon_generation / total_generation_except_imports) * 100
 
     return {
         "latest_total": country_latest,
         "previous_total": country_previous,
-        "low_carbon_pct": low_carbon_pct,
+        "share_low_carbon": share_low_carbon,
     }
 
 
@@ -215,7 +215,7 @@ def _load_country(code: str, country_name: str, metrics: dict, latest_month: dat
             "generation_latest_12_months": metrics["latest_total"],
             "generation_previous_12_months": metrics["previous_total"],
             "latest_month": latest_month,
-            "low_carbon_pct": metrics["low_carbon_pct"],
+            "share_low_carbon": metrics["share_low_carbon"],
             "electricity_rank": 0,  # Ranked in post-processing
         },
     )

@@ -61,8 +61,8 @@
                     {% endif %}
                 </td>
                 <td class="num-col">
-                    {% if country.low_carbon_pct is not None %}
-                    {{ country.low_carbon_pct|floatformat:1 }}%
+                    {% if country.share_low_carbon is not None %}
+                    {{ country.share_low_carbon|floatformat:1 }}%
                     {% else %}
                     N/A
                     {% endif %}
