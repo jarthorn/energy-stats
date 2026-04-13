@@ -70,6 +70,7 @@ class CountryEnergyBalanceYearAdmin(admin.ModelAdmin):
     )
     search_fields = ("country__name", "country__code")
 
+
 @admin.register(CountryTrackerYear)
 class CountryTrackerYearAdmin(admin.ModelAdmin):
     list_display = (

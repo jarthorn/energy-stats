@@ -81,9 +81,36 @@
         </a>
     </p>
     <p>
-        The specific metric we use on this site is <strong>Total Energy Suppply</strong>. This is the sum
+        The specific metric we use on this site is <strong>Total Energy Supply</strong>. This is the sum
         of the primary energy available for use in a country: domestic production, plus imports,
-        minus exports and fuel placed in international storage.
+        minus exports and fuel placed in international storage. The Energy Institute uses the
+        <a href="https://www.energyinst.org/statistical-review/about">Physical Energy Content</a> method
+        to calculate total energy supply.
+    </p>
+
+    <h2 id="electrification" class="section-title">
+        Electrification
+        <a href="#electrification" class="anchor-link">#</a>
+    </h2>
+    <p>
+        <strong>Electrification</strong> is the share of primary energy that is used for electricity generation.
+        There are a variety of ways to measure electrification, and you will see widely different values
+        for the same country from different sources. Our primary sources do not provide a direct measure of
+        electrification, so we have to calculate it from other metrics. We currently use a very simplistic
+        calculation based on data from The Energy Institute's Statistical Review of World Energy:
+        <ul>
+            <li>All energy associated with solar, wind, hydro and nuclear is considered electrified.</li>
+            <li>For fossil fuels, we assume a thermal efficiency of 33% for coal, 45% for gas, and 32% for oil.</li>
+            <li>We use a conversion factor of 1 TWh = 3.6 PJ, and divide by the thermal efficiency to translate
+                electricity generation from fossil fuels to primary energy.
+            </li>
+        </ul>
+        Although this corrects for the efficiency of fossil fuels as an electricity source, it does not
+        correct for the fact that electrified end-use devices are far more efficient than fossil fuel-based devices,
+        particularly for heating and transportation. For example, consider only passenger vehicles. Assume a country
+        has 50% of its vehicle fleet electrified (EV), and 50% with internal combustion engines (ICE), with an
+        equivalent mix of vehicle types and sizes. Since an EV has 90% efficiency, and ICE vehicles have about
+        25% efficiency, in primary energy terms this fleet would have a calculated electrification rate of about 22%.
     </p>
 
     <h2 id="source-code" class="section-title">
