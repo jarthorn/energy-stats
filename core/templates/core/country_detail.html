@@ -73,7 +73,7 @@
 
         <!-- Low Carbon Share -->
         <div class="gauge-card tooltip">
-            <div class="gauge-label">Low‑carbon Share</div>
+            <div class="gauge-label">Low-carbon Share</div>
             {% if country.share_low_carbon is not None %}
             <div class="speedometer" style="--value: {{ country.share_low_carbon|floatformat:2 }};">
                 <div class="speedometer-value">{{ country.share_low_carbon|floatformat:1 }}%</div>
@@ -82,7 +82,7 @@
             <div class="gauge-value">-</div>
             {% endif %}
             <div class="gauge-subtext">Electricity from non-fossil sources</div>
-            <span class="tooltiptext">Percentage of this country's electricity supplied by low‑carbon sources.</span>
+            <span class="tooltiptext">Percentage of this country's electricity supplied by renewables and nuclear.</span>
         </div>
 
         <!-- Largest Source -->
