@@ -28,8 +28,42 @@ def index(request):
 def tracker_index(request):
     latest_year = CountryTrackerYear.objects.aggregate(latest=Max("year"))["latest"]
     transition_scatter_html = None
+    electrification_rows = []
 
     if latest_year is not None:
+        countries_for_table = list(
+            CountryTrackerYear.objects.filter(year=latest_year)
+            .select_related("country")
+            .order_by("electricity_rank", "country__name")
+        )
+        country_ids = [r.country_id for r in countries_for_table]
+
+        compare_years = [latest_year - 1, latest_year - 5]
+        compare_rows = list(
+            CountryTrackerYear.objects.filter(country_id__in=country_ids, year__in=compare_years).values(
+                "country_id",
+                "year",
+                "share_electricity",
+            )
+        )
+        share_by_country_year = {(r["country_id"], r["year"]): r["share_electricity"] for r in compare_rows}
+
+        for r in countries_for_table:
+            current_share = r.share_electricity
+            prev_share = share_by_country_year.get((r.country_id, latest_year - 1))
+            five_year_share = share_by_country_year.get((r.country_id, latest_year - 5))
+
+            electrification_rows.append(
+                {
+                    "country_name": r.country.name,
+                    "electricity_rank": r.electricity_rank,
+                    "generation_twh": r.generation_twh,
+                    "share_electricity": current_share,
+                    "delta_prev_year": (current_share - prev_share) if prev_share is not None else None,
+                    "delta_5y": (current_share - five_year_share) if five_year_share is not None else None,
+                }
+            )
+
         tracker_rows = list(
             CountryTrackerYear.objects.filter(
                 year=latest_year,
@@ -101,6 +135,7 @@ def tracker_index(request):
         {
             "latest_year": latest_year,
             "transition_scatter_html": transition_scatter_html,
+            "electrification_rows": electrification_rows,
         },
     )
 

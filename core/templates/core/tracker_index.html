@@ -9,7 +9,7 @@
         <span class="page-pill">Work in progress</span>
     </div>
     <div class="page-subtitle">
-        Progress on the energy transition can be measured on two major dimensions: <strong></strong>electrification</strong> of the total energy supply, and
+        Progress on the energy transition can be measured on two major dimensions: <strong>electrification</strong> of the total energy supply, and
         <strong>decarbonization</strong> of the electricity grid (transition to renewable and nuclear power generation).
         Taken together, these dimensions give us a rough picture of how the transition is progressing around the world.
     </div>
@@ -30,6 +30,62 @@
     <div class="graph-title">Electrification vs low-carbon electricity ({{ latest_year }})</div>
     {{ transition_scatter_html|safe }}
 </div>
+{% else %}
+<div class="summary-box">
+    No tracker data available yet.
+</div>
+{% endif %}
+
+<h2 class="section-title">Electrification Progress</h2>
+<p class="section-description">
+    Country electrification rates over time, sorted by electricity generation rank{% if latest_year %} ({{ latest_year }}){% endif %}.
+</p>
+
+{% if electrification_rows %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th class="primary-col">Country</th>
+            <th class="num-col">Generation (TWh)</th>
+            <th class="num-col">Electrification rate</th>
+            <th class="num-col">Δ vs previous year</th>
+            <th class="num-col">Δ vs 5 years ago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in electrification_rows %}
+        <tr>
+            <td class="primary-col">{{ row.country_name }}</td>
+            <td class="num-col">
+                {% if row.generation_twh is not None %}
+                {{ row.generation_twh|floatformat:"0g" }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td class="num-col">{{ row.share_electricity|floatformat:1 }}%</td>
+            <td class="num-col">
+                {% if row.delta_prev_year is not None %}
+                <span class="{% if row.delta_prev_year > 0 %}positive{% elif row.delta_prev_year < 0 %}negative{% endif %}">
+                    {{ row.delta_prev_year|floatformat:1 }}%
+                </span>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td class="num-col">
+                {% if row.delta_5y is not None %}
+                <span class="{% if row.delta_5y > 0 %}positive{% elif row.delta_5y < 0 %}negative{% endif %}">
+                    {{ row.delta_5y|floatformat:1 }}%
+                </span>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% else %}
 <div class="summary-box">
     No tracker data available yet.
