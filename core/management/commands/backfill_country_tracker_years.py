@@ -6,7 +6,13 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Sum
 
-from core.models import Country, CountryEnergyBalanceYear, CountryFuelYear, CountryTrackerYear
+from core.models import (
+    Country,
+    CountryEnergyBalanceYear,
+    CountryFuelYear,
+    CountryTrackerYear,
+    MonthlyGenerationData,
+)
 
 LOW_CARBON_ELECTRICITY_FUELS = {
     "Hydro",
@@ -34,9 +40,11 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
         normalized = [c.strip().upper() for c in country_codes if c and c.strip()]
         countries_qs = countries_qs.filter(code__in=normalized)
 
-    country_ids = list(countries_qs.values_list("id", flat=True))
+    countries = list(countries_qs.values("id", "code"))
+    country_ids = [c["id"] for c in countries]
     if not country_ids:
         return 0
+    country_id_by_code = {c["code"]: c["id"] for c in countries}
 
     energy_rows = list(
         CountryEnergyBalanceYear.objects.filter(country_id__in=country_ids).values(
@@ -61,6 +69,20 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
         .annotate(low_carbon_generation=Sum("generation"))
     )
     low_carbon_by_key = {(r["country_id"], r["year"]): (r["low_carbon_generation"] or 0.0) for r in low_carbon_rows}
+
+    monthly_generation_rows = list(
+        MonthlyGenerationData.objects.filter(
+            country_code__in=list(country_id_by_code.keys()),
+            is_aggregate_series=False,
+        )
+        .values("country_code", "date__year")
+        .annotate(total_generation_twh=Sum("generation_twh"))
+    )
+    annual_gen_by_country = {
+        (country_id_by_code[r["country_code"]], r["date__year"]): (r["total_generation_twh"] or 0.0)
+        for r in monthly_generation_rows
+        if r["country_code"] in country_id_by_code and r["date__year"] is not None
+    }
 
     years = sorted({year for (_, year) in totals_by_key.keys()})
     rank_by_year_and_country: dict[tuple[int, int], int] = {}
@@ -88,6 +110,7 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
                 country_id,
                 year,
                 {
+                    "generation_twh": annual_gen_by_country.get((country_id, year)),
                     "electricity_rank": rank,
                     "electricity_share_low_carbon": electricity_share_low_carbon,
                     "share_electricity": energy_row["share_electricity"],
