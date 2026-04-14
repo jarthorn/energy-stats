@@ -16,3 +16,24 @@
 </div>
 {% endblock %}
 
+{% block content %}
+<h2 class="section-title">Transition in one chart</h2>
+<p class="section-description">
+    Each point is a country in the most recent available year{% if latest_year %} ({{ latest_year }}){% endif %}.
+    The X-axis shows progress on decarbonizing the electricity grid, measured as the share of electricity generation renewables and nuclear.
+    The Y-axis shows progress on electrifying the energy system, measured as the share of total energy supply that is used for electricity generation.
+    The size of each point is proportional to the total electricity generation for that country and year.
+</p>
+
+{% if transition_scatter_html %}
+<div class="graph-container">
+    <div class="graph-title">Electrification vs low-carbon electricity ({{ latest_year }})</div>
+    {{ transition_scatter_html|safe }}
+</div>
+{% else %}
+<div class="summary-box">
+    No tracker data available yet.
+</div>
+{% endif %}
+{% endblock %}
+

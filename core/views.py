@@ -1,12 +1,13 @@
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
-from django.db.models import OuterRef, Subquery
+from django.db.models import Max, OuterRef, Subquery
 from .models import (
     Country,
     CountryEnergyBalanceYear,
     CountryFuel,
     CountryFuelYear,
+    CountryTrackerYear,
     Fuel,
     FuelYear,
     MonthlyGenerationData,
@@ -25,7 +26,83 @@ def index(request):
 
 
 def tracker_index(request):
-    return render(request, "core/tracker_index.html")
+    latest_year = CountryTrackerYear.objects.aggregate(latest=Max("year"))["latest"]
+    transition_scatter_html = None
+
+    if latest_year is not None:
+        tracker_rows = list(
+            CountryTrackerYear.objects.filter(
+                year=latest_year,
+                share_electricity__gt=0,
+            )
+            .select_related("country")
+            .order_by("country__name")
+        )
+
+        countries = [r.country.name for r in tracker_rows]
+        x = [r.electricity_share_low_carbon for r in tracker_rows]
+        y = [r.share_electricity for r in tracker_rows]
+        gen = [(r.generation_twh or 0.0) for r in tracker_rows]
+
+        max_gen = max(gen) if gen else 0.0
+        desired_max_marker_size = 42
+        sizeref = (2.0 * max_gen / (desired_max_marker_size**2)) if max_gen > 0 else 1.0
+
+        fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    mode="markers",
+                    text=countries,
+                    customdata=list(zip(gen, x, y)),
+                    hovertemplate=(
+                        "<b>%{text}</b><br>"
+                        "Generation: %{customdata[0]:.0f} TWh<br>"
+                        "Low‑carbon electricity: %{customdata[1]:.1f}%<br>"
+                        "Electricity share of energy: %{customdata[2]:.1f}%"
+                        "<extra></extra>"
+                    ),
+                    marker=dict(
+                        size=gen,
+                        sizemode="area",
+                        sizeref=sizeref,
+                        sizemin=3,
+                        color=SCATTER_CHART_COLOR,
+                        opacity=0.75,
+                        line=dict(color="#ffffff", width=1),
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=30, r=20, t=20, b=40),
+            xaxis=dict(
+                title="Low‑carbon share of electricity generation (%)",
+                range=[0, 100],
+                gridcolor="rgba(225,229,238,0.8)",
+                zeroline=False,
+            ),
+            yaxis=dict(
+                title="Electricity share of total energy supply (%)",
+                range=[0, 100],
+                gridcolor="rgba(225,229,238,0.8)",
+                zeroline=False,
+            ),
+            showlegend=False,
+        )
+        transition_scatter_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+    return render(
+        request,
+        "core/tracker_index.html",
+        {
+            "latest_year": latest_year,
+            "transition_scatter_html": transition_scatter_html,
+        },
+    )
 
 
 def about(request):
