@@ -213,6 +213,11 @@ class CountryTrackerYear(models.Model):
         help_text="Country this tracker row applies to",
     )
     year = models.IntegerField(help_text="Calendar year")
+    generation_twh = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Total electricity generation for this country and year (TWh)",
+    )
     electricity_rank = models.IntegerField(help_text="The country's rank as an electricity producer")
     electricity_share_low_carbon = models.FloatField(
         help_text="Share of electricity generation from low-carbon sources (%)"
