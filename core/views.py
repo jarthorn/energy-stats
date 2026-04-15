@@ -93,7 +93,7 @@ def tracker_index(request):
                     hovertemplate=(
                         "<b>%{text}</b><br>"
                         "Generation: %{customdata[0]:.0f} TWh<br>"
-                        "Low‑carbon electricity: %{customdata[1]:.1f}%<br>"
+                        "Low-carbon electricity: %{customdata[1]:.1f}%<br>"
                         "Electricity share of energy: %{customdata[2]:.1f}%"
                         "<extra></extra>"
                     ),
@@ -114,7 +114,7 @@ def tracker_index(request):
             paper_bgcolor="rgba(0,0,0,0)",
             margin=dict(l=30, r=20, t=20, b=40),
             xaxis=dict(
-                title="Low‑carbon share of electricity generation (%)",
+                title="Low-carbon share of electricity generation (%)",
                 range=[0, 100],
                 gridcolor="rgba(225,229,238,0.8)",
                 zeroline=False,
