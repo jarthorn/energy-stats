@@ -4,7 +4,8 @@ from collections.abc import Iterable
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import F, FloatField, Sum
+from django.db.models.expressions import ExpressionWrapper
 
 from core.models import (
     Country,
@@ -12,6 +13,7 @@ from core.models import (
     CountryFuelYear,
     CountryTrackerYear,
     MonthlyGenerationData,
+    TrackerYear,
 )
 
 LOW_CARBON_ELECTRICITY_FUELS = {
@@ -22,6 +24,93 @@ LOW_CARBON_ELECTRICITY_FUELS = {
     "Bioenergy",
     "Other renewables",
 }
+
+
+def backfill_tracker_years(*, stdout=None) -> int:
+    """
+    Create or update TrackerYear rows (global aggregates) for all available years.
+
+    Weighting rules:
+    - electricity_share_low_carbon is weighted by CountryTrackerYear.generation_twh
+    - share_electricity and energy_share_low_carbon are weighted by CountryEnergyBalanceYear.total_supply
+    """
+
+    gen_weighted = list(
+        CountryTrackerYear.objects.filter(generation_twh__gt=0)
+        .values("year")
+        .annotate(
+            generation_twh_sum=Sum("generation_twh"),
+            electricity_share_low_carbon_weighted=Sum(
+                ExpressionWrapper(
+                    F("electricity_share_low_carbon") * F("generation_twh"),
+                    output_field=FloatField(),
+                )
+            ),
+        )
+    )
+    gen_by_year = {r["year"]: r for r in gen_weighted}
+
+    supply_weighted = list(
+        CountryEnergyBalanceYear.objects.filter(total_supply__gt=0)
+        .values("year")
+        .annotate(
+            total_supply_sum=Sum("total_supply"),
+            share_electricity_weighted=Sum(
+                ExpressionWrapper(
+                    F("share_electricity") * F("total_supply"),
+                    output_field=FloatField(),
+                )
+            ),
+            energy_share_low_carbon_weighted=Sum(
+                ExpressionWrapper(
+                    F("share_low_carbon") * F("total_supply"),
+                    output_field=FloatField(),
+                )
+            ),
+        )
+    )
+    supply_by_year = {r["year"]: r for r in supply_weighted}
+
+    years = sorted(set(gen_by_year.keys()) | set(supply_by_year.keys()))
+    if not years:
+        return 0
+
+    if stdout is not None:
+        stdout.write(f"Backfilling TrackerYear for {len(years)} year(s)...")
+
+    upserts = 0
+    with transaction.atomic():
+        for year in years:
+            gen_row = gen_by_year.get(year)
+            supply_row = supply_by_year.get(year)
+
+            generation_twh = gen_row["generation_twh_sum"] if gen_row else None
+            total_supply = supply_row["total_supply_sum"] if supply_row else None
+
+            electricity_share_low_carbon = 0.0
+            if gen_row and generation_twh and generation_twh > 0:
+                electricity_share_low_carbon = (
+                    gen_row["electricity_share_low_carbon_weighted"] or 0.0
+                ) / generation_twh
+
+            share_electricity = 0.0
+            energy_share_low_carbon = 0.0
+            if supply_row and total_supply and total_supply > 0:
+                share_electricity = (supply_row["share_electricity_weighted"] or 0.0) / total_supply
+                energy_share_low_carbon = (supply_row["energy_share_low_carbon_weighted"] or 0.0) / total_supply
+
+            TrackerYear.objects.update_or_create(
+                year=year,
+                defaults={
+                    "generation_twh": generation_twh,
+                    "electricity_share_low_carbon": electricity_share_low_carbon,
+                    "share_electricity": share_electricity,
+                    "energy_share_low_carbon": energy_share_low_carbon,
+                },
+            )
+            upserts += 1
+
+    return upserts
 
 
 def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None, stdout=None) -> int:
@@ -129,6 +218,8 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
                 year=year,
                 defaults=defaults,
             )
+
+    backfill_tracker_years(stdout=stdout)
 
     return len(upserts)
 
