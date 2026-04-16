@@ -56,6 +56,10 @@
         </div>
     </form>
     <div id="transition-line-chart" style="width: 100%; height: 460px;"></div>
+    <div id="transition-all-countries-disclaimer" class="section-description" style="margin-bottom: 0; display: none;">
+        Aggregate electrification is volume-weighted by each country's total energy supply. Low-carbon electricity is
+        volume-weighted by each country's total electricity generation.
+    </div>
     <script id="transition-line-series" type="application/json">{{ transition_line_series_json|safe }}</script>
     <script>
         (function () {
@@ -135,11 +139,21 @@
             document.addEventListener("DOMContentLoaded", function () {
                 const select = document.getElementById("transition-country-select");
                 if (!select) return;
+                const disclaimer = document.getElementById("transition-all-countries-disclaimer");
+
+                function syncDisclaimer() {
+                    if (!disclaimer) return;
+                    disclaimer.style.display = select.value === "ALL" ? "block" : "none";
+                }
 
                 ensurePlotlyLoaded()
                     .then(() => {
                         renderForCountry(select.value);
-                        select.addEventListener("change", () => renderForCountry(select.value));
+                        syncDisclaimer();
+                        select.addEventListener("change", () => {
+                            renderForCountry(select.value);
+                            syncDisclaimer();
+                        });
                     })
                     .catch(() => {
                         // If Plotly fails to load, silently skip rendering.
