@@ -235,6 +235,32 @@ class CountryTrackerYear(models.Model):
         return f"{self.country} - {self.year}"
 
 
+class TrackerYear(models.Model):
+    """
+    Memoized tracker metrics aggregated across all countries for one calendar year.
+    """
+
+    year = models.IntegerField(help_text="Calendar year", unique=True)
+    generation_twh = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Total electricity generation across all countries for this year (TWh)",
+    )
+    electricity_share_low_carbon = models.FloatField(
+        help_text="Share of electricity generation from low-carbon sources (%)"
+    )
+    share_electricity = models.FloatField(help_text="Share of primary energy that is generating electricity (%)")
+    energy_share_low_carbon = models.FloatField(help_text="Share of primary energy from low-carbon sources (%)")
+
+    class Meta:
+        verbose_name = "tracker year"
+        verbose_name_plural = "tracker years"
+        ordering = ["year"]
+
+    def __str__(self):
+        return f"All countries - {self.year}"
+
+
 class MonthlyGenerationRecord(models.Model):
     country = models.ForeignKey(
         Country,
