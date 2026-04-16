@@ -9,6 +9,7 @@ from .models import (
     CountryFuel,
     CountryFuelYear,
     CountryTrackerYear,
+    TrackerYear,
     Fuel,
     FuelYear,
     MonthlyGenerationData,
@@ -29,7 +30,7 @@ def index(request):
 def tracker_index(request):
     latest_year = CountryTrackerYear.objects.aggregate(latest=Max("year"))["latest"]
     transition_scatter_html = None
-    transition_line_default_country_code = "CAN"
+    transition_line_default_country_code = "ALL"
     transition_line_series_json = "null"
     transition_line_countries = []
     electrification_rows = []
@@ -99,8 +100,27 @@ def tracker_index(request):
             [{"code": v["code"], "name": v["name"]} for v in series_by_country.values()],
             key=lambda x: x["name"],
         )
-        if transition_line_default_country_code not in series_by_country and transition_line_countries:
-            transition_line_default_country_code = transition_line_countries[0]["code"]
+
+        all_countries_rows = list(
+            TrackerYear.objects.values(
+                "year",
+                "share_electricity",
+                "electricity_share_low_carbon",
+            ).order_by("year")
+        )
+        series_by_country["ALL"] = {
+            "code": "ALL",
+            "name": "All Countries",
+            "years": [r["year"] for r in all_countries_rows],
+            "electrification": [r["share_electricity"] for r in all_countries_rows],
+            "low_carbon_electricity": [r["electricity_share_low_carbon"] for r in all_countries_rows],
+        }
+
+        transition_line_countries = [
+            {"code": "ALL", "name": "All Countries", "is_divider": False},
+            {"code": "__DIVIDER__", "name": "──────────", "is_divider": True},
+            *[{**c, "is_divider": False} for c in transition_line_countries if c["code"] != "ALL"],
+        ]
 
         transition_line_series_json = json.dumps(series_by_country)
 

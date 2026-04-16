@@ -44,9 +44,13 @@
             <label for="transition-country-select">Country</label>
             <select id="transition-country-select">
                 {% for c in transition_line_countries %}
+                {% if c.is_divider %}
+                <option disabled>{{ c.name }}</option>
+                {% else %}
                 <option value="{{ c.code }}" {% if c.code == transition_line_default_country_code %}selected{% endif %}>
                     {{ c.name }}
                 </option>
+                {% endif %}
                 {% endfor %}
             </select>
         </div>
