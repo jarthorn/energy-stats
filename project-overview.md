@@ -20,3 +20,4 @@ This project uses source data from several different organizations. Since each o
 
 - Don't reformat or modify unrelated parts of the code when you make a change. The diff for each change should always be relevant to the change that I requested. I don't like to mix cosmetic and behavioural changes in the same commit.
 - I am an experienced developer, you don't need to offer to make trivial code changes for me.
+- Please ask clarifying questions if there are key technical decisions to make and you have low confidence in the right choice or believe it is subjective.
