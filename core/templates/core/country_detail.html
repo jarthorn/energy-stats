@@ -126,7 +126,7 @@
             {% if fastest_growing_pct is not None %}
             <div
                 class="gauge-subtext {% if fastest_growing_pct > 0 %}positive{% elif fastest_growing_pct < 0 %}negative{% endif %}">
-                {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:2 }}% YoY
+                {% if fastest_growing_pct > 0 %}+{% endif %}{{ fastest_growing_pct|floatformat:1 }}% YoY
             </div>
             {% endif %}
             {% if fastest_growing_source %}
@@ -165,7 +165,7 @@
                         {{ cf.fuel.type }}
                     </a>
                 </td>
-                <td class="num-col">{{ cf.generation_latest_month|floatformat:2 }} TWh</td>
+                <td class="num-col">{{ cf.generation_latest_month|floatformat:"1g" }} TWh</td>
                 <td class="num-col">{{ cf.share_latest_month|floatformat:1 }}%</td>
                 <td
                     class="num-col {% if cf.month_yoy_growth > 0 %}positive{% elif cf.month_yoy_growth < 0 %}negative{% endif %}">
@@ -175,7 +175,7 @@
                     -
                     {% endif %}
                 </td>
-                <td class="num-col">{{ cf.generation_latest_12_months|floatformat:2 }} TWh</td>
+                <td class="num-col">{{ cf.generation_latest_12_months|floatformat:"1g" }} TWh</td>
                 <td class="num-col">{{ cf.share|floatformat:1 }}%</td>
                 <td
                     class="num-col {% if cf.annual_yoy_growth > 0 %}positive{% elif cf.annual_yoy_growth < 0 %}negative{% endif %}">
