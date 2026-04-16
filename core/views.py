@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Max, OuterRef, Subquery
+import json
 from .models import (
     Country,
     CountryEnergyBalanceYear,
@@ -28,6 +29,9 @@ def index(request):
 def tracker_index(request):
     latest_year = CountryTrackerYear.objects.aggregate(latest=Max("year"))["latest"]
     transition_scatter_html = None
+    transition_line_default_country_code = "CAN"
+    transition_line_series_json = "null"
+    transition_line_countries = []
     electrification_rows = []
 
     if latest_year is not None:
@@ -63,6 +67,42 @@ def tracker_index(request):
                     "delta_5y": (current_share - five_year_share) if five_year_share is not None else None,
                 }
             )
+
+        all_tracker_rows = list(
+            CountryTrackerYear.objects.select_related("country")
+            .values(
+                "country__code",
+                "country__name",
+                "year",
+                "share_electricity",
+                "electricity_share_low_carbon",
+            )
+            .order_by("country__name", "year")
+        )
+        series_by_country: dict[str, dict] = {}
+        for r in all_tracker_rows:
+            code = r["country__code"]
+            if code not in series_by_country:
+                series_by_country[code] = {
+                    "code": code,
+                    "name": r["country__name"],
+                    "years": [],
+                    "electrification": [],
+                    "low_carbon_electricity": [],
+                }
+
+            series_by_country[code]["years"].append(r["year"])
+            series_by_country[code]["electrification"].append(r["share_electricity"])
+            series_by_country[code]["low_carbon_electricity"].append(r["electricity_share_low_carbon"])
+
+        transition_line_countries = sorted(
+            [{"code": v["code"], "name": v["name"]} for v in series_by_country.values()],
+            key=lambda x: x["name"],
+        )
+        if transition_line_default_country_code not in series_by_country and transition_line_countries:
+            transition_line_default_country_code = transition_line_countries[0]["code"]
+
+        transition_line_series_json = json.dumps(series_by_country)
 
         tracker_rows = list(
             CountryTrackerYear.objects.filter(
@@ -135,6 +175,9 @@ def tracker_index(request):
         {
             "latest_year": latest_year,
             "transition_scatter_html": transition_scatter_html,
+            "transition_line_default_country_code": transition_line_default_country_code,
+            "transition_line_series_json": transition_line_series_json,
+            "transition_line_countries": transition_line_countries,
             "electrification_rows": electrification_rows,
         },
     )
