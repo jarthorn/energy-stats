@@ -27,6 +27,7 @@ class BackfillCountryTrackerYearsTests(TestCase):
         )
         self.fuel_coal = Fuel.objects.create(type="Coal", rank=1, summary="Coal")
         self.fuel_hydro = Fuel.objects.create(type="Hydro", rank=2, summary="Hydro")
+        self.fuel_net_imports = Fuel.objects.create(type="Net imports", rank=999, summary="Net imports")
 
     def test_basic_backfill_all_sources_present(self):
         """
@@ -198,3 +199,59 @@ class BackfillCountryTrackerYearsTests(TestCase):
         upserts = backfill_country_tracker_years(country_codes=[self.country.code])
         self.assertEqual(upserts, 0)
         self.assertFalse(CountryTrackerYear.objects.filter(country=self.country, year=2024).exists())
+
+    def test_low_carbon_share_excludes_net_imports_from_denominator(self):
+        """
+        Ember fuel-year data includes a "Net imports" series which can be negative.
+        It should not be included in the total-generation denominator; otherwise shares
+        can exceed 100%.
+        """
+        CountryEnergyBalanceYear.objects.create(
+            country=self.country,
+            year=2024,
+            coal_supply=1,
+            oil_supply=1,
+            gas_supply=1,
+            nuclear_supply=1,
+            renewable_supply=1,
+            total_supply=5,
+            share_low_carbon=40.0,
+            share_renewable=20.0,
+            share_electricity=30.0,
+        )
+
+        # Domestic generation: Coal=70, Hydro=30 => low-carbon share should be 30%.
+        CountryFuelYear.objects.create(
+            country=self.country,
+            fuel=self.fuel_coal,
+            year=2024,
+            is_complete=True,
+            share=70.0,
+            generation=70.0,
+            yoy_growth=0.0,
+        )
+        CountryFuelYear.objects.create(
+            country=self.country,
+            fuel=self.fuel_hydro,
+            year=2024,
+            is_complete=True,
+            share=30.0,
+            generation=30.0,
+            yoy_growth=0.0,
+        )
+        # If included, this would inflate the low-carbon share above 30%.
+        CountryFuelYear.objects.create(
+            country=self.country,
+            fuel=self.fuel_net_imports,
+            year=2024,
+            is_complete=True,
+            share=-20.0,
+            generation=-20.0,
+            yoy_growth=0.0,
+        )
+
+        upserts = backfill_country_tracker_years(country_codes=[self.country.code])
+        self.assertEqual(upserts, 1)
+
+        tracker = CountryTrackerYear.objects.get(country=self.country, year=2024)
+        self.assertAlmostEqual(tracker.electricity_share_low_carbon, 30.0, places=6)

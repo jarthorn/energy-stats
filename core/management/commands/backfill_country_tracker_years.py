@@ -25,6 +25,12 @@ LOW_CARBON_ELECTRICITY_FUELS = {
     "Other renewables",
 }
 
+EXCLUDED_ELECTRICITY_FUELS = {
+    # Ember includes a balancing series that can be negative; it is not a fuel.
+    # Including it in the denominator can produce >100% shares.
+    "Net imports",
+}
+
 
 def backfill_tracker_years(*, stdout=None) -> int:
     """
@@ -146,14 +152,17 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
     energy_by_key = {(r["country_id"], r["year"]): r for r in energy_rows}
 
     totals_rows = list(
-        CountryFuelYear.objects.filter(country_id__in=country_ids)
+        CountryFuelYear.objects.filter(country_id__in=country_ids).exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
         .values("country_id", "year")
         .annotate(total_generation=Sum("generation"))
     )
     totals_by_key = {(r["country_id"], r["year"]): (r["total_generation"] or 0.0) for r in totals_rows}
 
     low_carbon_rows = list(
-        CountryFuelYear.objects.filter(country_id__in=country_ids, fuel__type__in=LOW_CARBON_ELECTRICITY_FUELS)
+        CountryFuelYear.objects.filter(
+            country_id__in=country_ids,
+            fuel__type__in=LOW_CARBON_ELECTRICITY_FUELS,
+        ).exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
         .values("country_id", "year")
         .annotate(low_carbon_generation=Sum("generation"))
     )
