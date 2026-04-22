@@ -51,6 +51,14 @@
                 Explore Fuels
             </a>
         </div>
+        <div class="feature-card" onclick="window.location.href='{% url 'tracker_index' %}';">
+            <h3>Transition Tracker</h3>
+            <p>Track electrification and low‑carbon electricity progress across countries over time.</p>
+            <a href="{% url 'tracker_index' %}" class="btn">
+                <span class="btn-icon">🧭</span>
+                Open Tracker
+            </a>
+        </div>
         <div class="feature-card" onclick="window.location.href='{% url 'monthly_generation_records_index' %}';">
             <h3>Electricity Records Explorer</h3>
             <p>Discover when each country and fuel set new records for electricity generation and share.</p>
