@@ -1,0 +1,9 @@
+---
+description: Always read project overview at start
+alwaysApply: true
+---
+
+# Project overview (mandatory)
+
+At the beginning of every session (before making any code changes), read `project-overview.md` and follow its instructions (tech stack, tooling, and preferences).
+
