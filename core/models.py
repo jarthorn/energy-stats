@@ -162,6 +162,19 @@ class FuelYear(models.Model):
         return f"{self.fuel} - {self.year}"
 
 
+class FuelMonth(models.Model):
+    fuel = models.ForeignKey(Fuel, on_delete=models.CASCADE, related_name="global_monthly_data")
+    month = models.DateField(help_text="Calendar month (always the first day of the month)")
+    share = models.FloatField(help_text="Share of total global generation for this fuel in this month")
+    generation = models.FloatField(help_text="Total global generation for this fuel in this month")
+
+    class Meta:
+        unique_together = [("fuel", "month")]
+
+    def __str__(self):
+        return f"{self.fuel} - {self.month}"
+
+
 class CountryEnergyBalanceYear(models.Model):
     """
     Total energy supply (TES) by source for one country and one calendar year.
