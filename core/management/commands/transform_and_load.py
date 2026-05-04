@@ -21,8 +21,9 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Sum
+from django.utils import timezone
 
-from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelYear, MonthlyGenerationData
+from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelMonth, FuelYear, MonthlyGenerationData
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +98,11 @@ class Command(BaseCommand):
             # 4. Transform & Load: Annual Aggregations
             _load_annual_data(country_obj, records)
 
-        # 5. Post-processing: Final Load phase (Rankings)
+        # 5. Post-processing: ranks, global fuel aggregates, summaries
         _apply_rankings(self.stdout)
+        load_annual_fuel_aggregates(self.stdout)
+        load_monthly_fuel_aggregates(self.stdout)
+        _apply_fuel_summaries(self.stdout)
 
         self.stdout.write(self.style.SUCCESS("\nTransformation and Loading complete."))
 
@@ -247,8 +251,8 @@ def _load_fuel_data(country_obj: Country, fuel_type: str, metrics: dict, latest_
 
 def _apply_rankings(stdout) -> None:
     """
-    Post-processing phase of Load: Update electricity ranks for countries
-    and global ranks for fuel types.
+    Post-processing: electricity ranks for countries, global ranks for fuel types,
+    and all-time generation totals on Fuel.
     """
     stdout.write("\nRanking countries by total generation...")
     countries = Country.objects.order_by("-generation_latest_12_months")
@@ -282,8 +286,10 @@ def _apply_rankings(stdout) -> None:
     for row in all_time_totals:
         Fuel.objects.filter(type=row["fuel_type"]).update(generation_all_time=row["total"] or 0.0)
 
+
+def load_annual_fuel_aggregates(stdout) -> None:
+    """Populate FuelYear from MonthlyGenerationData (global generation and share per calendar year)."""
     stdout.write("Populating annual global fuel data (FuelYear)...")
-    # 1. Calculate global total generation per year (excluding aggregates to avoid double counting)
     global_annual_totals = (
         MonthlyGenerationData.objects.filter(is_aggregate_series=False)
         .values("date__year")
@@ -291,7 +297,6 @@ def _apply_rankings(stdout) -> None:
     )
     year_totals = {row["date__year"]: row["total"] for row in global_annual_totals}
 
-    # 2. Calculate global fuel generation per year
     fuel_annual_totals = MonthlyGenerationData.objects.values("fuel_type", "date__year").annotate(
         total=Sum("generation_twh")
     )
@@ -317,8 +322,48 @@ def _apply_rankings(stdout) -> None:
             },
         )
 
-    stdout.write("Updating fuel summaries from data/fuel-summaries.json...")
-    _apply_fuel_summaries(stdout)
+
+def load_monthly_fuel_aggregates(stdout) -> None:
+    """Populate FuelMonth from MonthlyGenerationData for months on or after Jan 1 two years before today."""
+    stdout.write("Populating monthly global fuel data (FuelMonth)...")
+    fuel_month_start = date(timezone.now().year - 2, 1, 1)
+    removed, _ = FuelMonth.objects.filter(month__lt=fuel_month_start).delete()
+    if removed:
+        stdout.write(f"  Removed {removed} FuelMonth row(s) before {fuel_month_start.isoformat()}.")
+
+    global_month_totals = (
+        MonthlyGenerationData.objects.filter(is_aggregate_series=False, date__gte=fuel_month_start)
+        .values("date")
+        .annotate(total=Sum("generation_twh"))
+    )
+    month_totals = {row["date"]: row["total"] for row in global_month_totals}
+
+    fuel_month_totals = (
+        MonthlyGenerationData.objects.filter(date__gte=fuel_month_start)
+        .values("fuel_type", "date")
+        .annotate(total=Sum("generation_twh"))
+    )
+
+    for row in fuel_month_totals:
+        fuel_type = row["fuel_type"]
+        month = row["date"]
+        gen = row["total"] or 0.0
+
+        if not fuel_type:
+            continue
+
+        fuel_obj = Fuel.objects.get(type=fuel_type)
+        total_gen_for_month = month_totals.get(month, 0.0)
+        share = (gen / total_gen_for_month * 100) if total_gen_for_month > 0 else 0.0
+
+        FuelMonth.objects.update_or_create(
+            fuel=fuel_obj,
+            month=month,
+            defaults={
+                "generation": gen,
+                "share": share,
+            },
+        )
 
 
 def _load_annual_data(country_obj: Country, records) -> None:
@@ -386,6 +431,7 @@ def _apply_fuel_summaries(stdout) -> None:
     Fuels missing a summary are set to blank.
     """
     summaries_path = Path(settings.BASE_DIR) / "data" / "fuel-summaries.json"
+    stdout.write(f"Updating fuel summaries from {summaries_path}...")
 
     if not summaries_path.exists():
         stdout.write(f"  fuel-summaries.json not found at {summaries_path}. Skipping fuel summary update.")
