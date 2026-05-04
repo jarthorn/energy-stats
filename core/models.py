@@ -167,6 +167,10 @@ class FuelMonth(models.Model):
     month = models.DateField(help_text="Calendar month (always the first day of the month)")
     share = models.FloatField(help_text="Share of total global generation for this fuel in this month")
     generation = models.FloatField(help_text="Total global generation for this fuel in this month")
+    country_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of distinct countries with data for this fuel in this month",
+    )
 
     class Meta:
         unique_together = [("fuel", "month")]
