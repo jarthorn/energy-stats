@@ -26,7 +26,7 @@ from django.utils import timezone
 from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelMonth, FuelYear, MonthlyGenerationData
 
 logger = logging.getLogger(__name__)
-
+FUEL_MONTH_BACKFILL_YEARS = 3
 
 class Command(BaseCommand):
     help = "Transform data from MonthlyGenerationData and load it into Country, Fuel, and CountryFuel tables."
@@ -324,9 +324,9 @@ def load_annual_fuel_aggregates(stdout) -> None:
 
 
 def load_monthly_fuel_aggregates(stdout) -> None:
-    """Populate FuelMonth from MonthlyGenerationData for months on or after Jan 1 two years before today."""
+    """Populate FuelMonth from MonthlyGenerationData for specified number of years before today."""
     stdout.write("Populating monthly global fuel data (FuelMonth)...")
-    fuel_month_start = date(timezone.now().year - 2, 1, 1)
+    fuel_month_start = date(timezone.now().year - FUEL_MONTH_BACKFILL_YEARS, 1, 1)
     removed, _ = FuelMonth.objects.filter(month__lt=fuel_month_start).delete()
     if removed:
         stdout.write(f"  Removed {removed} FuelMonth row(s) before {fuel_month_start.isoformat()}.")

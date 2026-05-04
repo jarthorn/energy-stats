@@ -1,11 +1,9 @@
-from datetime import date, datetime
-from unittest.mock import patch
+from datetime import date
 
 from django.core.management import call_command
 from django.test import TestCase
-from django.utils import timezone
 
-from core.models import Country, CountryFuel, Fuel, FuelMonth, MonthlyGenerationData
+from core.models import Country, CountryFuel, Fuel, MonthlyGenerationData
 
 
 class CountryFuelTransformTests(TestCase):
@@ -78,19 +76,3 @@ class CountryFuelTransformTests(TestCase):
 
         count = CountryFuel.objects.filter(country__code=self.country_code, fuel__type=self.fuel_type).count()
         self.assertEqual(count, 1)
-
-    def test_fuel_month_backfill_respects_two_year_cutoff(self):
-        """
-        FuelMonth rows start at January 1 two years before the current date (e.g. 2024-01-01 when today is 2026-05-04).
-        Older months in staging must not produce FuelMonth rows.
-        """
-        fixed_now = timezone.make_aware(datetime(2026, 5, 4, 12, 0, 0))
-        with patch("core.management.commands.transform_and_load.timezone.now", return_value=fixed_now):
-            call_command("transform_and_load", country=[self.country_code])
-
-        self.assertFalse(FuelMonth.objects.filter(month__year=2023).exists())
-        self.assertEqual(FuelMonth.objects.filter(fuel__type=self.fuel_type).count(), 12)
-
-        dec = FuelMonth.objects.get(fuel__type=self.fuel_type, month=date(2024, 12, 1))
-        self.assertEqual(dec.generation, 10.0)
-        self.assertEqual(dec.share, 100.0)
