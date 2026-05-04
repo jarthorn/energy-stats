@@ -50,3 +50,4 @@ class FuelMonthTransformTests(TestCase):
         jan_2023 = FuelMonth.objects.get(fuel__type=self.fuel_type, month=date(2023, 1, 1))
         self.assertEqual(jan_2023.generation, 10.0)
         self.assertEqual(jan_2023.share, 100.0)
+        self.assertEqual(jan_2023.country_count, 1)

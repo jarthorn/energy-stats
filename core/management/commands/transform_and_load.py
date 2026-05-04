@@ -20,7 +20,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelMonth, FuelYear, MonthlyGenerationData
@@ -340,8 +340,16 @@ def load_monthly_fuel_aggregates(stdout) -> None:
 
     fuel_month_totals = (
         MonthlyGenerationData.objects.filter(date__gte=fuel_month_start)
+        .exclude(fuel_type="")
         .values("fuel_type", "date")
-        .annotate(total=Sum("generation_twh"))
+        .annotate(
+            total=Sum("generation_twh"),
+            country_count=Count(
+                "country_code",
+                filter=Q(is_aggregate_entity=False),
+                distinct=True,
+            ),
+        )
     )
 
     for row in fuel_month_totals:
@@ -362,6 +370,7 @@ def load_monthly_fuel_aggregates(stdout) -> None:
             defaults={
                 "generation": gen,
                 "share": share,
+                "country_count": row["country_count"],
             },
         )
 
