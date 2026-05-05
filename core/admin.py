@@ -5,6 +5,7 @@ from .models import (
     CountryFuelYear,
     Fuel,
     FuelYear,
+    FuelMonth,
     MonthlyGenerationData,
     MonthlyGenerationRecord,
     CountryEnergyBalanceYear,
@@ -52,6 +53,14 @@ class FuelYearAdmin(admin.ModelAdmin):
     list_display = ("fuel", "year", "generation", "share")
     list_filter = ("fuel", "year")
     search_fields = ("fuel__type",)
+
+
+@admin.register(FuelMonth)
+class FuelMonthAdmin(admin.ModelAdmin):
+    list_display = ("fuel", "month", "generation", "share", "country_count")
+    list_filter = ("fuel", "month")
+    search_fields = ("fuel__type",)
+    ordering = ("fuel", "month")
 
 
 @admin.register(MonthlyGenerationRecord)

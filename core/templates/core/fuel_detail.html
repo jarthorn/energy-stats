@@ -101,6 +101,12 @@
     </div>
     {% endif %}
 
+    {% if monthly_share_graph_html %}
+    <div class="graph-container">
+        {{ monthly_share_graph_html|safe }}
+    </div>
+    {% endif %}
+
     <div style="height: 16px;"></div>
 
     <div class="top-countries-card">

@@ -11,6 +11,7 @@ from .models import (
     CountryTrackerYear,
     TrackerYear,
     Fuel,
+    FuelMonth,
     FuelYear,
     MonthlyGenerationData,
     MonthlyGenerationRecord,
@@ -633,6 +634,78 @@ def fuel_detail(request, fuel_type):
 
         annual_generation_graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
 
+    monthly_share_graph_html = None
+    # Omit months for which we don't have enough data
+    latest_share_month = (
+        FuelMonth.objects.filter(fuel=fuel, country_count__gte=25)
+        .order_by("-month")
+        .values_list("month", flat=True)
+        .first()
+    )
+    if latest_share_month is not None:
+        data_points = list(FuelMonth.objects.filter(fuel=fuel, month__lte=latest_share_month).order_by("month"))
+        data_points = data_points[-36:]
+
+        if len(data_points) >= 12:
+            recent_data = data_points[-12:]
+            months_labels = [d.month.strftime("%b %Y") for d in recent_data]
+            recent_values = [d.share for d in recent_data]
+
+            previous_values = None
+            if len(data_points) >= 24:
+                previous_data = data_points[-24:-12]
+                previous_values = [d.share for d in previous_data]
+
+            two_years_ago_values = None
+            if len(data_points) >= 36:
+                two_years_ago_data = data_points[-36:-24]
+                two_years_ago_values = [d.share for d in two_years_ago_data]
+
+            fig_monthly = go.Figure()
+            fig_monthly.add_trace(
+                go.Scatter(
+                    x=months_labels,
+                    y=recent_values,
+                    mode="lines+markers",
+                    name="Latest 12 months",
+                    line=dict(color=SCATTER_CHART_COLOR, width=3),
+                )
+            )
+
+            if previous_values:
+                fig_monthly.add_trace(
+                    go.Scatter(
+                        x=months_labels,
+                        y=previous_values,
+                        mode="lines+markers",
+                        name="Previous 12 months",
+                        line=dict(color=SCATTER_CHART_COLOR, width=2, dash="dash"),
+                    )
+                )
+
+            if two_years_ago_values:
+                fig_monthly.add_trace(
+                    go.Scatter(
+                        x=months_labels,
+                        y=two_years_ago_values,
+                        mode="lines+markers",
+                        name="Two years prior",
+                        line=dict(color=SCATTER_CHART_COLOR, width=2, dash="dot"),
+                    )
+                )
+
+            fig_monthly.update_layout(
+                title_text=f"Global {fuel.type} Share by Month",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                margin=dict(l=40, r=20, t=60, b=40),
+            )
+            fig_monthly.update_yaxes(title_text="<b>Share</b> (%)", showgrid=True, gridcolor="lightgray")
+            fig_monthly.update_xaxes(showgrid=False)
+
+            monthly_share_graph_html = fig_monthly.to_html(full_html=False, include_plotlyjs=False)
+
     # Fetch country distribution (and also build "Top Countries" slices from it).
     #
     # We materialize once so we can reuse the same dataset for:
@@ -659,6 +732,7 @@ def fuel_detail(request, fuel_type):
     context = {
         "fuel": fuel,
         "annual_generation_graph_html": annual_generation_graph_html,
+        "monthly_share_graph_html": monthly_share_graph_html,
         "country_fuels": country_fuels,
         "top_generation_countries": top_generation_countries,
         "top_share_countries": top_share_countries,
