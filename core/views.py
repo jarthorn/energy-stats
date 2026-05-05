@@ -605,7 +605,7 @@ def fuel_detail(request, fuel_type):
     generations = [d.generation for d in annual_data]
     shares = [d.share for d in annual_data]
 
-    graph_html = None
+    annual_generation_graph_html = None
     if years:
         # Create figure with secondary y-axis
         fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -631,7 +631,7 @@ def fuel_detail(request, fuel_type):
         fig.update_yaxes(title_text="<b>Share</b> (%)", secondary_y=True, showgrid=False)
         fig.update_xaxes(type="category", showgrid=False)
 
-        graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
+        annual_generation_graph_html = fig.to_html(full_html=False, include_plotlyjs="cdn")
 
     # Fetch country distribution (and also build "Top Countries" slices from it).
     #
@@ -658,7 +658,7 @@ def fuel_detail(request, fuel_type):
 
     context = {
         "fuel": fuel,
-        "graph_html": graph_html,
+        "annual_generation_graph_html": annual_generation_graph_html,
         "country_fuels": country_fuels,
         "top_generation_countries": top_generation_countries,
         "top_share_countries": top_share_countries,
