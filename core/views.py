@@ -600,7 +600,7 @@ def fuel_detail(request, fuel_type):
     fuel = get_object_or_404(Fuel, type=fuel_type)
 
     # Fetch annual global data for the graph
-    annual_data = FuelYear.objects.filter(fuel=fuel).order_by("year")
+    annual_data = FuelYear.objects.filter(fuel=fuel, year__gte=2015).order_by("year")
 
     years = [d.year for d in annual_data]
     generations = [d.generation for d in annual_data]
