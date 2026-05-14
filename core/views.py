@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
 from django.http import Http404
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Max, OuterRef, Subquery
 import json
@@ -26,6 +27,26 @@ SCATTER_CHART_COLOR = "#cc2e89"
 
 def index(request):
     return render(request, "core/index.html")
+
+
+def robots_txt(request):
+    # Keep crawl scope explicit for the public site surface.
+    robots = """User-agent: *
+Disallow: /
+Allow: /$
+Allow: /about/
+Allow: /countries/
+Allow: /countries/*/
+Allow: /countries/*/fuels/*/
+Allow: /fuels/
+Allow: /fuels/*/
+Allow: /tracker/
+Allow: /records/
+Allow: /records/*/*/*/
+Allow: /favicon.ico
+Allow: /static/favicon.png
+"""
+    return HttpResponse(robots, content_type="text/plain")
 
 
 def tracker_index(request):
