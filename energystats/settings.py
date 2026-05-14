@@ -31,6 +31,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+ENABLE_ADMIN = os.getenv("DJANGO_ENABLE_ADMIN", str(DEBUG)).lower() == "true"
 
 allowed_hosts_env = os.getenv("DJANGO_ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = allowed_hosts_env.split(",") if allowed_hosts_env else ["localhost", "127.0.0.1"]
@@ -38,7 +39,6 @@ ALLOWED_HOSTS = allowed_hosts_env.split(",") if allowed_hosts_env else ["localho
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "core",
 ]
+
+if ENABLE_ADMIN:
+    INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -144,3 +147,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
+
+# Hardening for public deployments:
+# - keep only hashed artifacts to avoid exposing duplicate unhashed asset paths
+# - avoid permissive CORS headers on static files unless explicitly required
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+WHITENOISE_ALLOW_ALL_ORIGINS = False

@@ -23,5 +23,5 @@ urlpatterns = [
     path("", include("core.urls")),
 ]
 
-if settings.DEBUG:
+if settings.ENABLE_ADMIN:
     urlpatterns.append(path("admin/", admin.site.urls))
