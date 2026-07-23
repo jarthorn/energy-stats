@@ -80,7 +80,7 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        default_csv = Path(settings.BASE_DIR) / "data" / "ei-world-consolidated-panel-filtered-2024.csv"
+        default_csv = Path(settings.BASE_DIR) / "data" / "ei-world-consolidated-panel-filtered-2025.csv"
         parser.add_argument(
             "--csv",
             type=Path,

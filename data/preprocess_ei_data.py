@@ -169,6 +169,7 @@ def process_csv(input_filepath, output_filepath):
         # Process data rows
         rows_processed = 0
         rows_kept = 0
+        skipped_countries = set()
         columns = len(header)
 
         for row in reader:
@@ -182,6 +183,7 @@ def process_csv(input_filepath, output_filepath):
             # Map the country name if it exists in our mapping
             country = COUNTRY_MAPPING.get(country, country)
             if country not in ALLOWED_COUNTRIES:
+                skipped_countries.add(country)
                 continue
 
             if year >= MIN_YEAR:
@@ -193,12 +195,15 @@ def process_csv(input_filepath, output_filepath):
 
         print(f"Processed {rows_processed} data rows.")
         print(f"Kept {rows_kept} data rows.")
+        print(f"Skipped countries ({len(skipped_countries)}): {sorted(skipped_countries)}")
 
 
 def _transform_value(header, value):
     """
     Normalize all values to Exajoules
     """
+    if value == "":
+        value = 0
     if header in ("biodiesel_cons_pj", "biofuels_cons_pj", "ethanol_cons_pj"):
         # Convert Petajoules to Exajoules
         return float(value) / 1000.0
