@@ -73,6 +73,9 @@ DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Required for Ember extraction jobs / commands
 EMBER_API_KEY=your_ember_api_key
+
+# Required for CODERS generation-unit load commands
+CODERS_API_KEY=your_coders_api_key
 ```
 
 Notes:
@@ -80,6 +83,7 @@ Notes:
 - **`DJANGO_SECRET_KEY` is required**. If it’s missing, Django will crash on startup.
 - If `DATABASE_URL` is not set, the app uses **SQLite** at `db.sqlite3`.
 - `EMBER_API_KEY` is not strictly required, but it is essential to get the most valuable data sets. Ember API keys are freely available from [Ember's API page](https://ember-energy.org/data/api/).
+- `CODERS_API_KEY` is needed for Canadian generation-unit data. Request a free account at the [CODERS dashboard](https://coders.cme-emh.ca/).
 
 ### Initialize the database
 

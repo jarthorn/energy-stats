@@ -278,6 +278,84 @@ class TrackerYear(models.Model):
         return f"All countries - {self.year}"
 
 
+class GenerationUnit(models.Model):
+    """
+    A single electricity generation unit and its capacity/energy attributes.
+    Sourced from CODERS (Canadian Open-source Database for Energy Research and Systems).
+    https://coders.cme-emh.ca/dashboard/generators
+    """
+
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="generation_units",
+        help_text="Country where this generation unit is located",
+    )
+    region = models.CharField(
+        max_length=100,
+        help_text="Subnational region (e.g. province or state) where this unit is located",
+    )
+    fuel = models.ForeignKey(
+        Fuel,
+        on_delete=models.CASCADE,
+        related_name="generation_units",
+        help_text="Fuel / technology type for this generation unit",
+    )
+    year = models.IntegerField(help_text="Calendar year this capacity snapshot applies to")
+    generation_unit_name = models.CharField(max_length=200, help_text="Name of the generation unit")
+    unit_effective_capacity_mw = models.FloatField(help_text="Effective capacity of this generation unit (MW)")
+    unit_average_annual_energy_gwh = models.FloatField(
+        help_text="Average annual energy produced by this generation unit (GWh)"
+    )
+
+    class Meta:
+        verbose_name = "generation unit"
+        verbose_name_plural = "generation units"
+        ordering = ["country", "region", "generation_unit_name"]
+
+    def __str__(self):
+        return f"{self.generation_unit_name} ({self.country}, {self.year})"
+
+
+class GenerationUnitRegionFuelYear(models.Model):
+    """
+    Memoized GenerationUnit totals for one country, region, fuel, and year.
+    """
+
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="generation_unit_region_fuel_years",
+        help_text="Country these generation units belong to",
+    )
+    region = models.CharField(
+        max_length=100,
+        help_text="Subnational region (e.g. province or state) these generation units belong to",
+    )
+    fuel = models.ForeignKey(
+        Fuel,
+        on_delete=models.CASCADE,
+        related_name="generation_unit_region_fuel_years",
+        help_text="Fuel / technology type for these generation units",
+    )
+    year = models.IntegerField(help_text="Calendar year this capacity snapshot applies to")
+    effective_capacity_mw = models.FloatField(
+        help_text="Sum of effective capacity across generation units in this region/fuel/year (MW)"
+    )
+    average_annual_energy_gwh = models.FloatField(
+        help_text="Sum of average annual energy across generation units in this region/fuel/year (GWh)"
+    )
+
+    class Meta:
+        verbose_name = "generation unit region fuel year"
+        verbose_name_plural = "generation unit region fuel years"
+        unique_together = [("country", "region", "fuel", "year")]
+        ordering = ["country", "region", "fuel", "year"]
+
+    def __str__(self):
+        return f"{self.country} - {self.region} - {self.fuel} ({self.year})"
+
+
 class MonthlyGenerationRecord(models.Model):
     country = models.ForeignKey(
         Country,
