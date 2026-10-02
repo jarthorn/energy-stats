@@ -1,0 +1,100 @@
+from django.test import TestCase, override_settings
+from django.urls import reverse
+
+from core.models import Country, Fuel, GenerationUnitRegionFuelYear, GenerationUnitRegionYear
+from core.views import _generation_unit_regions_for_country
+
+
+@override_settings(
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+)
+class CountryRegionsIndexTests(TestCase):
+    def setUp(self):
+        self.country = Country.objects.create(
+            name="Canada",
+            code="CAN",
+            summary="Canada summary",
+            electricity_rank=1,
+            generation_latest_12_months=100.0,
+            generation_previous_12_months=90.0,
+        )
+        self.other_country = Country.objects.create(
+            name="Testland",
+            code="TST",
+            summary="No region data",
+            electricity_rank=2,
+            generation_latest_12_months=1.0,
+            generation_previous_12_months=1.0,
+        )
+        self.solar = Fuel.objects.create(type="Solar", rank=1, summary="Solar")
+        self.hydro = Fuel.objects.create(type="Hydro", rank=2, summary="Hydro")
+
+    def test_regions_index_shows_table_with_top_fuel(self):
+        GenerationUnitRegionYear.objects.create(
+            country=self.country,
+            region="AB",
+            year=2025,
+            effective_capacity_mw=18.0,
+            average_annual_energy_gwh=38.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="AB",
+            fuel=self.solar,
+            year=2025,
+            effective_capacity_mw=15.0,
+            average_annual_energy_gwh=30.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="AB",
+            fuel=self.hydro,
+            year=2025,
+            effective_capacity_mw=3.0,
+            average_annual_energy_gwh=8.0,
+        )
+
+        response = self.client.get(reverse("country_regions_index", args=["CAN"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "AB")
+        self.assertContains(response, "Solar")
+        self.assertNotContains(response, "not available")
+
+    def test_regions_index_shows_banner_when_no_data(self):
+        response = self.client.get(reverse("country_regions_index", args=["TST"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Regional generation unit data is not available for Testland.")
+        self.assertNotContains(response, "<table")
+
+    def test_top_fuel_uses_average_annual_energy(self):
+        GenerationUnitRegionYear.objects.create(
+            country=self.country,
+            region="BC",
+            year=2025,
+            effective_capacity_mw=10.0,
+            average_annual_energy_gwh=20.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="BC",
+            fuel=self.solar,
+            year=2025,
+            effective_capacity_mw=9.0,
+            average_annual_energy_gwh=5.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="BC",
+            fuel=self.hydro,
+            year=2025,
+            effective_capacity_mw=1.0,
+            average_annual_energy_gwh=15.0,
+        )
+
+        year, regions = _generation_unit_regions_for_country(self.country)
+        self.assertEqual(year, 2025)
+        self.assertEqual(len(regions), 1)
+        self.assertEqual(regions[0]["top_fuel"], self.hydro)

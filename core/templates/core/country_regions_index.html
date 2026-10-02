@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+
+{% block title %}Energy Stats - {{ country.name }} Regions{% endblock %}
+
+{% block extra_styles %}
+    .notice-banner {
+        background: rgba(16, 42, 67, 0.06);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--muted-text);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        color: var(--muted-text);
+        margin-top: 8px;
+    }
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        {{ country.name }} Regions
+        <span class="page-pill">Generation capacity</span>
+    </div>
+    <div class="page-subtitle">
+        Regional electricity generation capacity and average annual energy for {{ country.name }}{% if year %}, {{ year }}{% endif %}.
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_index' %}">Countries</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_detail' country.code %}">{{ country.name }}</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">Regions</span>
+    </nav>
+
+    {% if regions %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Region</th>
+                <th class="num-col">Effective Capacity (MW)</th>
+                <th class="num-col">Average Annual Energy (GWh)</th>
+                <th>Top Fuel</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in regions %}
+            <tr>
+                <td class="primary-col">{{ row.region }}</td>
+                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
+                <td class="num-col">{{ row.average_annual_energy_gwh|floatformat:"0g" }}</td>
+                <td>
+                    {% if row.top_fuel %}
+                    {{ row.top_fuel.type }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="notice-banner">
+        Regional generation unit data is not available for {{ country.name }}.
+    </div>
+    {% endif %}
+{% endblock %}
