@@ -3,7 +3,8 @@ Management command: load_generation_units
 
 Loads GenerationUnit rows from the CODERS generators API for Canada.
 Replaces all existing GenerationUnit rows for the target country and year,
-then rebuilds GenerationUnitRegionFuelYear aggregates from those units.
+then rebuilds GenerationUnitRegionFuelYear and GenerationUnitRegionYear
+aggregates from those units.
 
 CODERS gen_type values are mapped onto Ember Fuel.type names. The snapshot year
 is hard-coded (override with --year).
@@ -21,7 +22,13 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Sum
 
-from core.models import Country, Fuel, GenerationUnit, GenerationUnitRegionFuelYear
+from core.models import (
+    Country,
+    Fuel,
+    GenerationUnit,
+    GenerationUnitRegionFuelYear,
+    GenerationUnitRegionYear,
+)
 from energystats.tasks.load_coders import CodersApiClient
 
 COUNTRY_CODE = "CAN"
@@ -143,10 +150,36 @@ def _build_region_fuel_year_aggregates(
     ]
 
 
+def _build_region_year_aggregates(
+    *,
+    country: Country,
+    year: int,
+) -> list[GenerationUnitRegionYear]:
+    """Sum GenerationUnit capacity/energy by country, region, and year (all fuels)."""
+    rows = (
+        GenerationUnit.objects.filter(country=country, year=year)
+        .values("region")
+        .annotate(
+            effective_capacity_mw=Sum("unit_effective_capacity_mw"),
+            average_annual_energy_gwh=Sum("unit_average_annual_energy_gwh"),
+        )
+    )
+    return [
+        GenerationUnitRegionYear(
+            country=country,
+            region=row["region"],
+            year=year,
+            effective_capacity_mw=row["effective_capacity_mw"] or 0.0,
+            average_annual_energy_gwh=row["average_annual_energy_gwh"] or 0.0,
+        )
+        for row in rows
+    ]
+
+
 class Command(BaseCommand):
     help = (
         "Load GenerationUnit rows for Canada from the CODERS generators API, "
-        "then rebuild GenerationUnitRegionFuelYear aggregates."
+        "then rebuild GenerationUnitRegionFuelYear and GenerationUnitRegionYear aggregates."
     )
 
     def add_arguments(self, parser):
@@ -190,15 +223,23 @@ class Command(BaseCommand):
             deleted_units, _ = GenerationUnit.objects.filter(country=country, year=year).delete()
             GenerationUnit.objects.bulk_create(units)
 
-            aggregates = _build_region_fuel_year_aggregates(country=country, year=year)
-            deleted_aggregates, _ = GenerationUnitRegionFuelYear.objects.filter(country=country, year=year).delete()
-            GenerationUnitRegionFuelYear.objects.bulk_create(aggregates)
+            fuel_aggregates = _build_region_fuel_year_aggregates(country=country, year=year)
+            deleted_fuel_aggregates, _ = GenerationUnitRegionFuelYear.objects.filter(
+                country=country, year=year
+            ).delete()
+            GenerationUnitRegionFuelYear.objects.bulk_create(fuel_aggregates)
+
+            region_aggregates = _build_region_year_aggregates(country=country, year=year)
+            deleted_region_aggregates, _ = GenerationUnitRegionYear.objects.filter(country=country, year=year).delete()
+            GenerationUnitRegionYear.objects.bulk_create(region_aggregates)
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"Loaded {len(units)} GenerationUnit row(s) for {country.code} year {year} "
                 f"(replaced {deleted_units} existing unit row(s); skipped {skipped} API row(s)). "
-                f"Rebuilt {len(aggregates)} GenerationUnitRegionFuelYear row(s) "
-                f"(replaced {deleted_aggregates} existing aggregate row(s))."
+                f"Rebuilt {len(fuel_aggregates)} GenerationUnitRegionFuelYear row(s) "
+                f"(replaced {deleted_fuel_aggregates}) and "
+                f"{len(region_aggregates)} GenerationUnitRegionYear row(s) "
+                f"(replaced {deleted_region_aggregates})."
             )
         )

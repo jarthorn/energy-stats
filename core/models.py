@@ -356,6 +356,39 @@ class GenerationUnitRegionFuelYear(models.Model):
         return f"{self.country} - {self.region} - {self.fuel} ({self.year})"
 
 
+class GenerationUnitRegionYear(models.Model):
+    """
+    Memoized GenerationUnit totals for one country, region, and year (all fuels).
+    """
+
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="generation_unit_region_years",
+        help_text="Country these generation units belong to",
+    )
+    region = models.CharField(
+        max_length=100,
+        help_text="Subnational region (e.g. province or state) these generation units belong to",
+    )
+    year = models.IntegerField(help_text="Calendar year this capacity snapshot applies to")
+    effective_capacity_mw = models.FloatField(
+        help_text="Sum of effective capacity across generation units in this region/year (MW)"
+    )
+    average_annual_energy_gwh = models.FloatField(
+        help_text="Sum of average annual energy across generation units in this region/year (GWh)"
+    )
+
+    class Meta:
+        verbose_name = "generation unit region year"
+        verbose_name_plural = "generation unit region years"
+        unique_together = [("country", "region", "year")]
+        ordering = ["country", "region", "year"]
+
+    def __str__(self):
+        return f"{self.country} - {self.region} ({self.year})"
+
+
 class MonthlyGenerationRecord(models.Model):
     country = models.ForeignKey(
         Country,

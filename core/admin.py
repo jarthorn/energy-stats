@@ -8,6 +8,7 @@ from .models import (
     FuelMonth,
     GenerationUnit,
     GenerationUnitRegionFuelYear,
+    GenerationUnitRegionYear,
     MonthlyGenerationData,
     MonthlyGenerationRecord,
     CountryEnergyBalanceYear,
@@ -92,6 +93,19 @@ class GenerationUnitRegionFuelYearAdmin(admin.ModelAdmin):
     )
     list_filter = ("country", "region", "fuel", "year")
     search_fields = ("country__name", "country__code", "region", "fuel__type")
+
+
+@admin.register(GenerationUnitRegionYear)
+class GenerationUnitRegionYearAdmin(admin.ModelAdmin):
+    list_display = (
+        "country",
+        "region",
+        "year",
+        "effective_capacity_mw",
+        "average_annual_energy_gwh",
+    )
+    list_filter = ("country", "region", "year")
+    search_fields = ("country__name", "country__code", "region")
 
 
 @admin.register(MonthlyGenerationRecord)
