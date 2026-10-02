@@ -28,6 +28,7 @@ from core.models import Country, CountryFuel, CountryFuelYear, Fuel, FuelMonth, 
 logger = logging.getLogger(__name__)
 FUEL_MONTH_BACKFILL_YEARS = 3
 
+
 class Command(BaseCommand):
     help = "Transform data from MonthlyGenerationData and load it into Country, Fuel, and CountryFuel tables."
 
@@ -453,11 +454,10 @@ def _apply_fuel_summaries(stdout) -> None:
         stdout.write(f"  Failed to load fuel summaries: {exc}. Skipping.")
         return
 
-    # Prefer data file value over existing value in the database, if present.
+    # Always reset from the data file (blank if missing) so appended country stats
+    # are not duplicated across reloads.
     for fuel in Fuel.objects.all():
-        summary = summaries.get(fuel.type, "")
-        if summary:
-            fuel.summary = summary
+        fuel.summary = summaries.get(fuel.type, "")
         top_country_fuel_generation = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_generation)
         top_country_fuel_share = CountryFuel.objects.get(fuel=fuel, country=fuel.top_country_share)
         country_fuel_summary = (
