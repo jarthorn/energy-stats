@@ -3,7 +3,6 @@ from django.urls import reverse
 
 from core.models import Country, Fuel, GenerationUnitRegionFuelYear, GenerationUnitRegionYear
 from core.templatetags.core_extras import region_display_name
-from core.views import _generation_unit_regions_for_country
 
 
 @override_settings(
@@ -95,11 +94,11 @@ class CountryRegionsIndexTests(TestCase):
             average_annual_energy_gwh=15.0,
         )
 
-        year, regions = _generation_unit_regions_for_country(self.country)
-        self.assertEqual(year, 2025)
-        self.assertEqual(len(regions), 1)
-        self.assertEqual(regions[0]["top_fuel"], self.hydro)
-        self.assertEqual(regions[0]["region"], "BC")
+        response = self.client.get(reverse("country_regions_index", args=["CAN"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "British Columbia")
+        self.assertContains(response, "Hydro")
+        self.assertNotContains(response, "Solar")
 
     def test_region_display_name_maps_canadian_provinces(self):
         self.assertEqual(region_display_name("QC", self.country), "Quebec")

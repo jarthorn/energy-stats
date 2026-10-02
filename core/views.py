@@ -503,7 +503,33 @@ def country_detail(request, code):
 
 def country_regions_index(request, code):
     country = get_object_or_404(Country, code=code)
-    year, regions = _generation_unit_regions_for_country(country)
+
+    year = GenerationUnitRegionYear.objects.filter(country=country).aggregate(latest=Max("year"))["latest"]
+    regions: list[dict] = []
+    if year is not None:
+        region_years = list(GenerationUnitRegionYear.objects.filter(country=country, year=year).order_by("region"))
+        fuel_years = (
+            GenerationUnitRegionFuelYear.objects.filter(country=country, year=year)
+            .select_related("fuel")
+            .order_by("region", "-average_annual_energy_gwh", "-effective_capacity_mw")
+        )
+
+        # Top fuel by average annual energy; capacity is the tiebreaker.
+        top_fuel_by_region: dict[str, Fuel] = {}
+        for row in fuel_years:
+            if row.region not in top_fuel_by_region:
+                top_fuel_by_region[row.region] = row.fuel
+
+        regions = [
+            {
+                "region": row.region,
+                "effective_capacity_mw": row.effective_capacity_mw,
+                "average_annual_energy_gwh": row.average_annual_energy_gwh,
+                "top_fuel": top_fuel_by_region.get(row.region),
+            }
+            for row in region_years
+        ]
+
     return render(
         request,
         "core/country_regions_index.html",
@@ -513,41 +539,6 @@ def country_regions_index(request, code):
             "regions": regions,
         },
     )
-
-
-def _generation_unit_regions_for_country(country: Country) -> tuple[int | None, list[dict]]:
-    """
-    Build region index rows from GenerationUnitRegionYear for the latest available year.
-
-    Each row includes region totals plus the top fuel by average annual energy
-    (capacity as a tiebreaker), taken from GenerationUnitRegionFuelYear.
-    """
-    year = GenerationUnitRegionYear.objects.filter(country=country).aggregate(latest=Max("year"))["latest"]
-    if year is None:
-        return None, []
-
-    region_years = list(GenerationUnitRegionYear.objects.filter(country=country, year=year).order_by("region"))
-    fuel_years = (
-        GenerationUnitRegionFuelYear.objects.filter(country=country, year=year)
-        .select_related("fuel")
-        .order_by("region", "-average_annual_energy_gwh", "-effective_capacity_mw")
-    )
-
-    top_fuel_by_region: dict[str, Fuel] = {}
-    for row in fuel_years:
-        if row.region not in top_fuel_by_region:
-            top_fuel_by_region[row.region] = row.fuel
-
-    regions = [
-        {
-            "region": row.region,
-            "effective_capacity_mw": row.effective_capacity_mw,
-            "average_annual_energy_gwh": row.average_annual_energy_gwh,
-            "top_fuel": top_fuel_by_region.get(row.region),
-        }
-        for row in region_years
-    ]
-    return year, regions
 
 
 def country_fuel_detail(request, code, fuel_type):
