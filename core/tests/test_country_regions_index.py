@@ -2,6 +2,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Country, Fuel, GenerationUnitRegionFuelYear, GenerationUnitRegionYear
+from core.templatetags.core_extras import region_display_name
 from core.views import _generation_unit_regions_for_country
 
 
@@ -59,7 +60,7 @@ class CountryRegionsIndexTests(TestCase):
 
         response = self.client.get(reverse("country_regions_index", args=["CAN"]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "AB")
+        self.assertContains(response, "Alberta")
         self.assertContains(response, "Solar")
         self.assertNotContains(response, "not available")
 
@@ -98,3 +99,9 @@ class CountryRegionsIndexTests(TestCase):
         self.assertEqual(year, 2025)
         self.assertEqual(len(regions), 1)
         self.assertEqual(regions[0]["top_fuel"], self.hydro)
+        self.assertEqual(regions[0]["region"], "BC")
+
+    def test_region_display_name_maps_canadian_provinces(self):
+        self.assertEqual(region_display_name("QC", self.country), "Quebec")
+        self.assertEqual(region_display_name("XX", self.country), "XX")
+        self.assertEqual(region_display_name("AB", self.other_country), "AB")

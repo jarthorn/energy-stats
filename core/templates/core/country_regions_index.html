@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load core_extras %}
 
 {% block title %}Energy Stats - {{ country.name }} Regions{% endblock %}
 
@@ -50,7 +51,7 @@
         <tbody>
             {% for row in regions %}
             <tr>
-                <td class="primary-col">{{ row.region }}</td>
+                <td class="primary-col">{{ row.region|region_display_name:country }}</td>
                 <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
                 <td class="num-col">{{ row.average_annual_energy_gwh|floatformat:"0g" }}</td>
                 <td>
