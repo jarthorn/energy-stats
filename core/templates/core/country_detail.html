@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load core_extras %}
 
 {% block title %}Energy Stats - {{ country.name }}{% endblock %}
 
@@ -56,7 +57,11 @@
 
     <h2 class="section-title">Electricity Generation</h2>
     <div class="section-description">
-        Electricity generation in {{ country.name }} from {{ start_date|date:"F Y" }} to {{ country.latest_month|date:"F Y" }}.
+        Electricity generation in {{ country.name }} from {{ start_date|date:"F Y" }} to {{ country.latest_month|date:"F Y" }} (Source: Ember).
+        {% if has_region_generation_data %}
+        Explore generation capacity by
+        <a href="{% url 'country_regions_index' country.code %}">{{ country|region_term:"region" }}</a>.
+        {% endif %}
     </div>
     <div class="dashboard">
 

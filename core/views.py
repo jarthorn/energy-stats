@@ -494,6 +494,8 @@ def country_detail(request, code):
             }
         )
 
+    has_region_generation_data = GenerationUnitRegionYear.objects.filter(country=country).exists()
+
     context = {
         "country": country,
         "primary_energy_balance": primary_energy_balance,
@@ -507,6 +509,7 @@ def country_detail(request, code):
         "fastest_growing_source": fastest_growing_source,
         "fastest_growing_pct": fastest_growing_pct,
         "monthly_generation_records": monthly_record_rows,
+        "has_region_generation_data": has_region_generation_data,
     }
     return render(request, "core/country_detail.html", context)
 
