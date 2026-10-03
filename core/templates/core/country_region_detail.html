@@ -3,6 +3,28 @@
 
 {% block title %}Energy Stats - {{ country.name }} - {{ region|region_display_name:country }}{% endblock %}
 
+{% block extra_styles %}
+    .speedometer {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0;
+        background:
+            radial-gradient(closest-side, #ffffff 72%, transparent 73% 100%),
+            conic-gradient(var(--accent-color) calc(var(--value, 0) * 1%), rgba(16, 42, 67, 0.12) 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .speedometer-value {
+        font-size: 1.35rem;
+        font-weight: 650;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+{% endblock %}
+
 {% block page_header %}
 <div class="page-header">
     <div class="page-title">
@@ -12,10 +34,6 @@
     <div class="page-subtitle">
         {{ country|region_term:"Regional" }} electricity generation capacity and average annual energy
         for {{ region|region_display_name:country }}{% if year %}, {{ year }}{% endif %}.
-        Total effective capacity:
-        {{ region_year.effective_capacity_mw|floatformat:"0g" }} MW;
-        total average annual energy:
-        {{ region_year.average_annual_energy_gwh|floatformat:"0g" }} GWh.
         {% if country.code == "CAN" %}
         Canadian generation data is sourced from the Canadian Open-Source Database for Energy Research and Systems-Modelling
         (<a href="https://coders.cme-emh.ca/" target="_blank" rel="noopener noreferrer">CODERS</a>).
@@ -36,6 +54,83 @@
         <span class="breadcrumbs-separator">/</span>
         <span class="breadcrumbs-current">{{ region|region_display_name:country }}</span>
     </nav>
+
+    <h2 class="section-title">Electricity Generation</h2>
+    <div class="section-description">
+        Generation-unit capacity and average annual energy for {{ region|region_display_name:country }}{% if year %}, {{ year }}{% endif %}.
+    </div>
+    <div class="dashboard">
+
+        <!-- Generation -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Total Generation</div>
+            <div class="gauge-value">{{ region_year.average_annual_energy_gwh|floatformat:"0g" }} GWh</div>
+            {% if yoy_growth_pct is not None %}
+            <div
+                class="gauge-subtext {% if yoy_growth_pct > 0 %}positive{% elif yoy_growth_pct < 0 %}negative{% endif %}">
+                {% if yoy_growth_pct > 0 %}+{% endif %}{{ yoy_growth_pct|floatformat:1 }}% YoY
+            </div>
+            {% else %}
+            <div class="gauge-subtext">Average annual energy</div>
+            {% endif %}
+            <span class="tooltiptext">Sum of average annual energy across generation units in this {{ country|region_term:"region" }}.</span>
+        </div>
+
+        <!-- Low Carbon Share -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Low-carbon Share</div>
+            {% if share_low_carbon is not None %}
+            <div class="speedometer" style="--value: {{ share_low_carbon|floatformat:2 }};">
+                <div class="speedometer-value">{{ share_low_carbon|floatformat:1 }}%</div>
+            </div>
+            {% else %}
+            <div class="gauge-value">-</div>
+            {% endif %}
+            <div class="gauge-subtext">Electricity from non-fossil sources</div>
+            <span class="tooltiptext">Percentage of this {{ country|region_term:"region" }}'s average annual energy from renewables and nuclear.</span>
+        </div>
+
+        <!-- Largest Source -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Main Electricity Source</div>
+            <div class="gauge-value">
+                {% if largest_source %}
+                {{ largest_source.fuel.type }}
+                {% else %}
+                N/A
+                {% endif %}
+            </div>
+            {% if largest_source_share is not None %}
+            <div class="gauge-subtext">
+                {{ largest_source_share|floatformat:"1g" }}% of total generation
+            </div>
+            {% endif %}
+            {% if largest_source %}
+            <div class="gauge-subtext">
+                {{ largest_source.average_annual_energy_gwh|floatformat:"0g" }} GWh
+            </div>
+            {% endif %}
+            <span class="tooltiptext">The power source with the most average annual energy in this {{ country|region_term:"region" }}.</span>
+        </div>
+
+        <!-- Largest Generator -->
+        <div class="gauge-card tooltip">
+            <div class="gauge-label">Largest Generator</div>
+            <div class="gauge-value">
+                {% if largest_generator %}
+                {{ largest_generator.generation_unit_name }}
+                {% else %}
+                N/A
+                {% endif %}
+            </div>
+            {% if largest_generator %}
+            <div class="gauge-subtext">
+                {{ largest_generator.fuel.type }} • {{ largest_generator.unit_average_annual_energy_gwh|floatformat:"0g" }} GWh
+            </div>
+            {% endif %}
+            <span class="tooltiptext">The generation unit with the most average annual energy in this {{ country|region_term:"region" }}.</span>
+        </div>
+    </div>
 
     <h2 class="section-title">Generation by Fuel</h2>
     <table class="data-table">

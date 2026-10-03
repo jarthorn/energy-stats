@@ -26,6 +26,14 @@ from plotly.subplots import make_subplots
 
 BAR_CHART_COLOR = "#2ecc71"
 SCATTER_CHART_COLOR = "#cc2e89"
+LOW_CARBON_ELECTRICITY_FUELS = {
+    "Hydro",
+    "Nuclear",
+    "Wind",
+    "Solar",
+    "Bioenergy",
+    "Other renewables",
+}
 
 
 def index(request):
@@ -556,16 +564,39 @@ def country_region_detail(request, code, region):
         raise Http404(f"No generation unit data for region '{region}' in {country.code}.")
 
     region_year = get_object_or_404(GenerationUnitRegionYear, country=country, region=region, year=year)
+    previous_region_year = GenerationUnitRegionYear.objects.filter(
+        country=country, region=region, year=year - 1
+    ).first()
+    yoy_growth_pct = None
+    if previous_region_year is not None:
+        yoy_growth_pct = _growth_rate(
+            region_year.average_annual_energy_gwh,
+            previous_region_year.average_annual_energy_gwh,
+        )
+
     fuels = list(
         GenerationUnitRegionFuelYear.objects.filter(country=country, region=region, year=year)
         .select_related("fuel")
         .order_by("-average_annual_energy_gwh", "fuel__type")
     )
+
+    total_energy = region_year.average_annual_energy_gwh or 0.0
+    low_carbon_energy = sum(
+        row.average_annual_energy_gwh for row in fuels if row.fuel.type in LOW_CARBON_ELECTRICITY_FUELS
+    )
+    share_low_carbon = (low_carbon_energy / total_energy * 100) if total_energy > 0 else None
+
+    largest_source = fuels[0] if fuels else None
+    largest_source_share = None
+    if largest_source is not None and total_energy > 0:
+        largest_source_share = largest_source.average_annual_energy_gwh / total_energy * 100
+
     top_generators = list(
         GenerationUnit.objects.filter(country=country, region=region, year=year)
         .select_related("fuel")
         .order_by("-unit_average_annual_energy_gwh", "generation_unit_name")[:10]
     )
+    largest_generator = top_generators[0] if top_generators else None
 
     return render(
         request,
@@ -575,6 +606,11 @@ def country_region_detail(request, code, region):
             "region": region,
             "year": year,
             "region_year": region_year,
+            "yoy_growth_pct": yoy_growth_pct,
+            "share_low_carbon": share_low_carbon,
+            "largest_source": largest_source,
+            "largest_source_share": largest_source_share,
+            "largest_generator": largest_generator,
             "fuels": fuels,
             "top_generators": top_generators,
         },

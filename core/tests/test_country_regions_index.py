@@ -158,14 +158,20 @@ class CountryRegionsIndexTests(TestCase):
         response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Alberta")
-        self.assertContains(response, "18")
+        self.assertContains(response, "Total Generation")
+        self.assertContains(response, "Low-carbon Share")
+        self.assertContains(response, "Main Electricity Source")
+        self.assertContains(response, "Largest Generator")
         self.assertContains(response, "38")
+        self.assertContains(response, "100.0%")
         content = response.content.decode()
         self.assertLess(content.index("Solar"), content.index("Hydro"))
         self.assertContains(response, "Unit 11")
         self.assertContains(response, "Unit 02")
         self.assertNotContains(response, "Unit 00")
         self.assertNotContains(response, "Unit 01")
+        # Largest-generator gauge should surface the top unit by average annual energy.
+        self.assertIn("Unit 11", content.split("Largest Generator", 1)[1].split("Generation by Fuel", 1)[0])
 
     def test_region_detail_returns_404_when_missing(self):
         response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
