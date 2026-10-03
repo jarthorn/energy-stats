@@ -122,3 +122,13 @@ If you only want to load the Energy Institute balance data:
 uv run python manage.py load_country_energy_balance
 ```
 
+## Data source attribution
+
+This project draws from data provided by multiple organizations. Because methodologies can differ, the site avoids directly combining or comparing metrics from different sources as if they were identical. In every case, we strive to use the most reputable and up-to-date data available. Our main sources are:
+
+- **Energy Institute (EI) — Statistical Review of World Energy**: Total energy supply and related energy-system totals. See the source [dataset](https://www.energyinst.org/statistical-review/resources-and-data-downloads) and [methodology](https://sr25downloads.blob.core.windows.net/production-reports/Methodology.pdf). Note that while the IEA is the key global source for primary energy data, their restrictive licensing prevents us from using it for this site. The Energy Institute is an independent and well regarded alternative source.
+
+- **Ember — Monthly Electricity Data**: Monthly electricity generation data for 88 countries. See the source [dataset](https://ember-energy.org/data/monthly-electricity-data/) and [methodology](https://ember-energy.org/app/uploads/2024/05/Ember-Electricity-Data-Methodology.pdf). Note that data series from Ember for each country start at different years, and are updated on different cadences. In most cases, we use rolling 12-month data windows so that the most recent data are included, while avoiding the skewing effect of seasonal fluctuations. Also noteworthy, data from China starts in 2015, and data from India starts in 2019. These countries are large enough that global-level statistics can be skewed when viewed year over year over those time periods.
+
+- **CODERS — Canadian Open-Source Database for Energy Research and Systems-Modelling**: Canadian generation data is sourced from the Canadian Open-Source Database for Energy Research and Systems-Modelling ([CODERS](https://coders.cme-emh.ca/)). Licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). On this site, generation-unit capacity and average annual energy are aggregated by province/territory.
+
