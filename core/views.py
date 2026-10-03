@@ -589,10 +589,11 @@ def country_region_detail(request, code, region):
     )
     share_low_carbon = (low_carbon_energy / total_energy * 100) if total_energy > 0 else None
 
+    for row in fuels:
+        row.share_pct = (row.average_annual_energy_gwh / total_energy * 100) if total_energy > 0 else None
+
     largest_source = fuels[0] if fuels else None
-    largest_source_share = None
-    if largest_source is not None and total_energy > 0:
-        largest_source_share = largest_source.average_annual_energy_gwh / total_energy * 100
+    largest_source_share = largest_source.share_pct if largest_source is not None else None
 
     top_generators = list(
         GenerationUnit.objects.filter(country=country, region=region, year=year)
