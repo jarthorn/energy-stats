@@ -536,7 +536,7 @@ def country_regions_index(request, code):
 
     return render(
         request,
-        "core/country_regions_index.html",
+        "core/country_region_index.html",
         {
             "country": country,
             "year": year,
