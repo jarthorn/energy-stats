@@ -37,24 +37,51 @@
         <span class="breadcrumbs-current">{{ region|region_display_name:country }}</span>
     </nav>
 
+    <h2 class="section-title">Generation by Fuel</h2>
     <table class="data-table">
         <thead>
             <tr>
                 <th>Fuel</th>
-                <th class="num-col">Effective Capacity (MW)</th>
                 <th class="num-col">Average Annual Energy (GWh)</th>
+                <th class="num-col">Effective Capacity (MW)</th>
             </tr>
         </thead>
         <tbody>
             {% for row in fuels %}
             <tr>
                 <td class="primary-col">{{ row.fuel.type }}</td>
-                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
                 <td class="num-col">{{ row.average_annual_energy_gwh|floatformat:"0g" }}</td>
+                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
             </tr>
             {% empty %}
             <tr>
                 <td colspan="3">No fuel-level generation unit data is available for this {{ country|region_term:"region" }}.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="section-title">Top Generators</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Generator</th>
+                <th class="num-col">Average Annual Energy (GWh)</th>
+                <th class="num-col">Effective Capacity (MW)</th>
+                <th>Fuel</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for unit in top_generators %}
+            <tr>
+                <td class="primary-col">{{ unit.generation_unit_name }}</td>
+                <td class="num-col">{{ unit.unit_average_annual_energy_gwh|floatformat:"0g" }}</td>
+                <td class="num-col">{{ unit.unit_effective_capacity_mw|floatformat:"0g" }}</td>
+                <td>{{ unit.fuel.type }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No generation units are available for this {{ country|region_term:"region" }}.</td>
             </tr>
             {% endfor %}
         </tbody>

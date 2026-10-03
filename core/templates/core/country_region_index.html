@@ -47,8 +47,8 @@
         <thead>
             <tr>
                 <th>{{ country|region_term:"Region" }}</th>
-                <th class="num-col">Effective Capacity (MW)</th>
                 <th class="num-col">Average Annual Energy (GWh)</th>
+                <th class="num-col">Effective Capacity (MW)</th>
                 <th>Top Fuel</th>
             </tr>
         </thead>
@@ -56,8 +56,8 @@
             {% for row in regions %}
             <tr onclick="window.location.href='{% url 'country_region_detail' country.code row.region %}';" style="cursor: pointer;">
                 <td class="primary-col">{{ row.region|region_display_name:country }}</td>
-                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
                 <td class="num-col">{{ row.average_annual_energy_gwh|floatformat:"0g" }}</td>
+                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
                 <td>
                     {% if row.top_fuel %}
                     {{ row.top_fuel.type }}

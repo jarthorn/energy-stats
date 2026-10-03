@@ -14,6 +14,7 @@ from .models import (
     Fuel,
     FuelMonth,
     FuelYear,
+    GenerationUnit,
     GenerationUnitRegionFuelYear,
     GenerationUnitRegionYear,
     MonthlyGenerationData,
@@ -560,6 +561,11 @@ def country_region_detail(request, code, region):
         .select_related("fuel")
         .order_by("-average_annual_energy_gwh", "fuel__type")
     )
+    top_generators = list(
+        GenerationUnit.objects.filter(country=country, region=region, year=year)
+        .select_related("fuel")
+        .order_by("-unit_average_annual_energy_gwh", "generation_unit_name")[:10]
+    )
 
     return render(
         request,
@@ -570,6 +576,7 @@ def country_region_detail(request, code, region):
             "year": year,
             "region_year": region_year,
             "fuels": fuels,
+            "top_generators": top_generators,
         },
     )
 

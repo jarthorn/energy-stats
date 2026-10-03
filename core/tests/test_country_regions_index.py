@@ -1,7 +1,13 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from core.models import Country, Fuel, GenerationUnitRegionFuelYear, GenerationUnitRegionYear
+from core.models import (
+    Country,
+    Fuel,
+    GenerationUnit,
+    GenerationUnitRegionFuelYear,
+    GenerationUnitRegionYear,
+)
 from core.templatetags.core_extras import region_display_name, region_term
 
 
@@ -138,6 +144,16 @@ class CountryRegionsIndexTests(TestCase):
             effective_capacity_mw=3.0,
             average_annual_energy_gwh=8.0,
         )
+        for i in range(12):
+            GenerationUnit.objects.create(
+                country=self.country,
+                region="AB",
+                fuel=self.solar if i < 10 else self.hydro,
+                year=2025,
+                generation_unit_name=f"Unit {i:02d}",
+                unit_effective_capacity_mw=float(i + 1),
+                unit_average_annual_energy_gwh=float(i + 1),
+            )
 
         response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
         self.assertEqual(response.status_code, 200)
@@ -146,6 +162,10 @@ class CountryRegionsIndexTests(TestCase):
         self.assertContains(response, "38")
         content = response.content.decode()
         self.assertLess(content.index("Solar"), content.index("Hydro"))
+        self.assertContains(response, "Unit 11")
+        self.assertContains(response, "Unit 02")
+        self.assertNotContains(response, "Unit 00")
+        self.assertNotContains(response, "Unit 01")
 
     def test_region_detail_returns_404_when_missing(self):
         response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
