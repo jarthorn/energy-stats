@@ -113,3 +113,40 @@ class CountryRegionsIndexTests(TestCase):
         self.assertEqual(region_term(self.country, "region"), "province")
         self.assertEqual(region_term(self.other_country, "Regions"), "Regions")
         self.assertEqual(region_term(self.other_country, "regional"), "regional")
+
+    def test_region_detail_lists_fuels_sorted_by_average_annual_energy(self):
+        GenerationUnitRegionYear.objects.create(
+            country=self.country,
+            region="AB",
+            year=2025,
+            effective_capacity_mw=18.0,
+            average_annual_energy_gwh=38.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="AB",
+            fuel=self.solar,
+            year=2025,
+            effective_capacity_mw=15.0,
+            average_annual_energy_gwh=30.0,
+        )
+        GenerationUnitRegionFuelYear.objects.create(
+            country=self.country,
+            region="AB",
+            fuel=self.hydro,
+            year=2025,
+            effective_capacity_mw=3.0,
+            average_annual_energy_gwh=8.0,
+        )
+
+        response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Alberta")
+        self.assertContains(response, "18")
+        self.assertContains(response, "38")
+        content = response.content.decode()
+        self.assertLess(content.index("Solar"), content.index("Hydro"))
+
+    def test_region_detail_returns_404_when_missing(self):
+        response = self.client.get(reverse("country_region_detail", args=["CAN", "AB"]))
+        self.assertEqual(response.status_code, 404)

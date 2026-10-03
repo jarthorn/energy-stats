@@ -40,6 +40,7 @@ Allow: /about/
 Allow: /countries/
 Allow: /countries/*/
 Allow: /countries/*/regions/
+Allow: /countries/*/regions/*/
 Allow: /countries/*/fuels/*/
 Allow: /fuels/
 Allow: /fuels/*/
@@ -541,6 +542,34 @@ def country_regions_index(request, code):
             "country": country,
             "year": year,
             "regions": regions,
+        },
+    )
+
+
+def country_region_detail(request, code, region):
+    country = get_object_or_404(Country, code=code)
+    year = GenerationUnitRegionYear.objects.filter(country=country, region=region).aggregate(latest=Max("year"))[
+        "latest"
+    ]
+    if year is None:
+        raise Http404(f"No generation unit data for region '{region}' in {country.code}.")
+
+    region_year = get_object_or_404(GenerationUnitRegionYear, country=country, region=region, year=year)
+    fuels = list(
+        GenerationUnitRegionFuelYear.objects.filter(country=country, region=region, year=year)
+        .select_related("fuel")
+        .order_by("-average_annual_energy_gwh", "fuel__type")
+    )
+
+    return render(
+        request,
+        "core/country_region_detail.html",
+        {
+            "country": country,
+            "region": region,
+            "year": year,
+            "region_year": region_year,
+            "fuels": fuels,
         },
     )
 

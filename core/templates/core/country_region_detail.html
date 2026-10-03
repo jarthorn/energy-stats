@@ -1,0 +1,62 @@
+{% extends "core/base.html" %}
+{% load core_extras %}
+
+{% block title %}Energy Stats - {{ country.name }} - {{ region|region_display_name:country }}{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-title">
+        {{ region|region_display_name:country }}
+        <span class="page-pill">{{ country.name }}</span>
+    </div>
+    <div class="page-subtitle">
+        {{ country|region_term:"Regional" }} electricity generation capacity and average annual energy
+        for {{ region|region_display_name:country }}{% if year %}, {{ year }}{% endif %}.
+        Total effective capacity:
+        {{ region_year.effective_capacity_mw|floatformat:"0g" }} MW;
+        total average annual energy:
+        {{ region_year.average_annual_energy_gwh|floatformat:"0g" }} GWh.
+        {% if country.code == "CAN" %}
+        Canadian generation data is sourced from the Canadian Open-Source Database for Energy Research and Systems-Modelling
+        (<a href="https://coders.cme-emh.ca/" target="_blank" rel="noopener noreferrer">CODERS</a>).
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_index' %}">Countries</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_detail' country.code %}">{{ country.name }}</a>
+        <span class="breadcrumbs-separator">/</span>
+        <a href="{% url 'country_regions_index' country.code %}">{{ country|region_term:"Regions" }}</a>
+        <span class="breadcrumbs-separator">/</span>
+        <span class="breadcrumbs-current">{{ region|region_display_name:country }}</span>
+    </nav>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fuel</th>
+                <th class="num-col">Effective Capacity (MW)</th>
+                <th class="num-col">Average Annual Energy (GWh)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in fuels %}
+            <tr>
+                <td class="primary-col">{{ row.fuel.type }}</td>
+                <td class="num-col">{{ row.effective_capacity_mw|floatformat:"0g" }}</td>
+                <td class="num-col">{{ row.average_annual_energy_gwh|floatformat:"0g" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No fuel-level generation unit data is available for this {{ country|region_term:"region" }}.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
