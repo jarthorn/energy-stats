@@ -507,7 +507,11 @@ def country_regions_index(request, code):
     year = GenerationUnitRegionYear.objects.filter(country=country).aggregate(latest=Max("year"))["latest"]
     regions: list[dict] = []
     if year is not None:
-        region_years = list(GenerationUnitRegionYear.objects.filter(country=country, year=year).order_by("region"))
+        region_years = list(
+            GenerationUnitRegionYear.objects.filter(country=country, year=year).order_by(
+                "-average_annual_energy_gwh", "region"
+            )
+        )
         fuel_years = (
             GenerationUnitRegionFuelYear.objects.filter(country=country, year=year)
             .select_related("fuel")

@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load core_extras %}
 
-{% block title %}Energy Stats - {{ country.name }} Regions{% endblock %}
+{% block title %}Energy Stats - {{ country.name }} {{ country|region_term:"Regions" }}{% endblock %}
 
 {% block extra_styles %}
     .notice-banner {
@@ -18,11 +18,15 @@
 {% block page_header %}
 <div class="page-header">
     <div class="page-title">
-        {{ country.name }} Regions
+        {{ country.name }} {{ country|region_term:"Regions" }}
         <span class="page-pill">Generation capacity</span>
     </div>
     <div class="page-subtitle">
-        Regional electricity generation capacity and average annual energy for {{ country.name }}{% if year %}, {{ year }}{% endif %}.
+        {{ country|region_term:"Regional" }} electricity generation capacity and average annual energy for {{ country.name }}{% if year %}, {{ year }}{% endif %}.
+        {% if country.code == "CAN" %}
+        Canadian generation data is sourced from the Canadian Open-Source Database for Energy Research and Systems-Modelling
+        (<a href="https://coders.cme-emh.ca/" target="_blank" rel="noopener noreferrer">CODERS</a>).
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -35,14 +39,14 @@
         <span class="breadcrumbs-separator">/</span>
         <a href="{% url 'country_detail' country.code %}">{{ country.name }}</a>
         <span class="breadcrumbs-separator">/</span>
-        <span class="breadcrumbs-current">Regions</span>
+        <span class="breadcrumbs-current">{{ country|region_term:"Regions" }}</span>
     </nav>
 
     {% if regions %}
     <table class="data-table">
         <thead>
             <tr>
-                <th>Region</th>
+                <th>{{ country|region_term:"Region" }}</th>
                 <th class="num-col">Effective Capacity (MW)</th>
                 <th class="num-col">Average Annual Energy (GWh)</th>
                 <th>Top Fuel</th>
@@ -67,7 +71,7 @@
     </table>
     {% else %}
     <div class="notice-banner">
-        Regional generation unit data is not available for {{ country.name }}.
+        {{ country|region_term:"Regional" }} generation unit data is not available for {{ country.name }}.
     </div>
     {% endif %}
 {% endblock %}

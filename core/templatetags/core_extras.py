@@ -18,6 +18,15 @@ CANADA_REGION_DISPLAY_NAMES: dict[str, str] = {
     "YT": "Yukon",
 }
 
+# Display nouns/adjectives for subnational areas. Canada uses province terminology.
+REGION_TERMS_BY_COUNTRY: dict[str, dict[str, str]] = {
+    "CAN": {
+        "region": "province",
+        "regions": "provinces",
+        "regional": "provincial",
+    },
+}
+
 
 @register.filter
 def region_display_name(region: str, country) -> str:
@@ -30,3 +39,28 @@ def region_display_name(region: str, country) -> str:
     if getattr(country, "code", None) == "CAN":
         return CANADA_REGION_DISPLAY_NAMES.get(region, region)
     return region
+
+
+@register.filter
+def region_term(country, kind: str) -> str:
+    """
+    Return the country-appropriate label for a region term.
+
+    ``kind`` should be one of: region, regions, regional (any capitalization).
+    For Canada this becomes province / provinces / provincial; otherwise the
+    input kind is returned with its original capitalization style preserved.
+    """
+    key = kind.lower()
+    defaults = {
+        "region": "region",
+        "regions": "regions",
+        "regional": "regional",
+    }
+    if key not in defaults:
+        return kind
+
+    country_code = getattr(country, "code", None)
+    value = REGION_TERMS_BY_COUNTRY.get(country_code, defaults).get(key, defaults[key])
+    if kind[:1].isupper():
+        value = value[:1].upper() + value[1:]
+    return value
