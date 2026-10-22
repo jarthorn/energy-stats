@@ -152,7 +152,8 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
     energy_by_key = {(r["country_id"], r["year"]): r for r in energy_rows}
 
     totals_rows = list(
-        CountryFuelYear.objects.filter(country_id__in=country_ids).exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
+        CountryFuelYear.objects.filter(country_id__in=country_ids)
+        .exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
         .values("country_id", "year")
         .annotate(total_generation=Sum("generation"))
     )
@@ -162,7 +163,8 @@ def backfill_country_tracker_years(*, country_codes: Iterable[str] | None = None
         CountryFuelYear.objects.filter(
             country_id__in=country_ids,
             fuel__type__in=LOW_CARBON_ELECTRICITY_FUELS,
-        ).exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
+        )
+        .exclude(fuel__type__in=EXCLUDED_ELECTRICITY_FUELS)
         .values("country_id", "year")
         .annotate(low_carbon_generation=Sum("generation"))
     )

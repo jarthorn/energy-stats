@@ -5,23 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0021_trackeryear'),
+        ("core", "0021_trackeryear"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FuelMonth',
+            name="FuelMonth",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('month', models.DateField(help_text='Calendar month (always the first day of the month)')),
-                ('share', models.FloatField(help_text='Share of total global generation for this fuel in this month')),
-                ('generation', models.FloatField(help_text='Total global generation for this fuel in this month')),
-                ('fuel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='global_monthly_data', to='core.fuel')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("month", models.DateField(help_text="Calendar month (always the first day of the month)")),
+                ("share", models.FloatField(help_text="Share of total global generation for this fuel in this month")),
+                ("generation", models.FloatField(help_text="Total global generation for this fuel in this month")),
+                (
+                    "fuel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="global_monthly_data", to="core.fuel"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('fuel', 'month')},
+                "unique_together": {("fuel", "month")},
             },
         ),
     ]
