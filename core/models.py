@@ -182,9 +182,8 @@ class FuelMonth(models.Model):
 class CountryEnergyBalanceYear(models.Model):
     """
     Total energy supply (TES) by source for one country and one calendar year.
-    Sourced from IEA World Energy Balances.
+    Sourced from Energy Institute Statistical Review of World Energy.
     Note that energy supply is production + imports - exports.
-    See https://www.iea.org/data-and-statistics/data-product/world-energy-balances for more details.
     """
 
     country = models.ForeignKey(
